@@ -34,7 +34,7 @@
                 </div>
                 <div>
                     <h1 class="font-bold text-lg leading-none text-white">QR Poster Studio Pro</h1>
-                    <p class="text-xs text-slate-400 mt-1">Upload Templat, Custom Dimensi (Panjang & Lebar) & Kelancipan</p>
+                    <p class="text-xs text-slate-400 mt-1">Pengaturan Panjang & Lebar Terpisah</p>
                 </div>
             </div>
             <div class="flex items-center gap-2">
@@ -123,20 +123,20 @@
                 </div>
             </div>
 
-            <!-- Step 4: Fine-Tuning Calibration (X, Y, Width, Height & Radius) -->
+            <!-- Step 4: Fine-Tuning Calibration (Independent Width & Height) -->
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
                 <label class="block text-sm font-semibold text-slate-200 flex items-center justify-between">
                     <span class="flex items-center gap-2">
                         <i data-lucide="sliders" class="w-4 h-4 text-blue-400"></i>
-                        4. Dimensi, Kelancipan & Kalibrasi Manual
+                        4. Kalibrasi Panjang, Lebar & Kelancipan
                     </span>
-                    <button onclick="resetPosition()" class="text-xs text-blue-400 hover:underline">Reset Posisi</button>
+                    <button onclick="resetPosition()" class="text-xs text-blue-400 hover:underline">Reset Ukuran</button>
                 </label>
 
-                <!-- Visual Arrow Buttons & Scale Controls -->
+                <!-- Navigation and Lock Option -->
                 <div class="flex items-center justify-between gap-4 border-b border-slate-800 pb-4">
                     <div class="flex flex-col items-center">
-                        <span class="text-[10px] text-slate-400 mb-1">Navigasi Tombol</span>
+                        <span class="text-[10px] text-slate-400 mb-1">Navigasi Posisi</span>
                         <div class="grid grid-cols-3 gap-1 w-28">
                             <div></div>
                             <button onclick="moveQR(0, -2)" class="p-1.5 bg-slate-800 hover:bg-slate-700 rounded text-center"><i data-lucide="chevron-up" class="w-4 h-4 mx-auto"></i></button>
@@ -147,24 +147,16 @@
                         </div>
                     </div>
                     <div class="flex flex-col gap-2 flex-1">
-                        <div class="flex justify-between items-center">
-                            <span class="text-[10px] text-slate-400">Kunci Rasio Persegi (1:1)</span>
-                            <input type="checkbox" id="keepAspect" checked onchange="toggleAspectLock()" class="w-3.5 h-3.5 accent-blue-500 rounded cursor-pointer">
+                        <div class="flex items-center justify-between bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                            <span class="text-xs text-slate-300 font-medium">Samakan Panjang & Lebar</span>
+                            <input type="checkbox" id="keepAspect" onchange="toggleAspectLock()" class="w-4 h-4 accent-blue-500 rounded cursor-pointer">
                         </div>
-                        <div class="flex gap-2">
-                            <button onclick="resizeQR(-10)" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs font-bold border border-slate-700 flex items-center justify-center gap-1">
-                                <i data-lucide="minus" class="w-3.5 h-3.5"></i> Kecilkan
-                            </button>
-                            <button onclick="resizeQR(10)" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs font-bold border border-slate-700 flex items-center justify-center gap-1">
-                                <i data-lucide="plus" class="w-3.5 h-3.5"></i> Besarkan
-                            </button>
-                        </div>
-                        <p class="text-[10px] text-slate-400 italic">💡 Gunakan Panah Keyboard (`Up`, `Down`, `Left`, `Right`)</p>
+                        <p class="text-[10px] text-slate-400 italic">💡 Hilangkan centang di atas untuk mengatur Panjang/Lebar secara mandiri.</p>
                     </div>
                 </div>
 
-                <!-- Sliders for Manual Value Adjustment -->
-                <div class="space-y-3">
+                <!-- Sliders for Independent Dimensions -->
+                <div class="space-y-4">
                     <!-- Corner Radius Slider -->
                     <div>
                         <div class="flex justify-between text-xs text-slate-400 mb-1">
@@ -176,26 +168,30 @@
                         <input type="range" id="radiusInput" min="0" max="60" value="16" oninput="updateFromSliders()" class="w-full accent-blue-500">
                     </div>
 
-                    <!-- Independent Width & Height Sliders -->
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <div class="flex justify-between text-xs text-slate-400 mb-1">
-                                <span>Lebar (Width)</span>
-                                <span id="valWidth" class="font-semibold text-slate-200">200 px</span>
-                            </div>
-                            <input type="range" id="widthInput" min="40" max="800" value="200" oninput="updateFromSliders('width')" class="w-full accent-blue-500">
+                    <!-- Independent Width Slider -->
+                    <div class="bg-slate-950/50 p-3 rounded-xl border border-slate-800/80">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-slate-300 font-semibold flex items-center gap-1">
+                                <i data-lucide="arrow-left-right" class="w-3.5 h-3.5 text-blue-400"></i> Ubah LEBAR Saja
+                            </span>
+                            <span id="valWidth" class="font-bold text-blue-400">200 px</span>
                         </div>
-                        <div>
-                            <div class="flex justify-between text-xs text-slate-400 mb-1">
-                                <span>Tinggi / Panjang (Height)</span>
-                                <span id="valHeight" class="font-semibold text-slate-200">200 px</span>
-                            </div>
-                            <input type="range" id="heightInput" min="40" max="800" value="200" oninput="updateFromSliders('height')" class="w-full accent-blue-500">
+                        <input type="range" id="widthInput" min="40" max="800" value="200" oninput="updateFromSliders('width')" class="w-full accent-blue-500">
+                    </div>
+
+                    <!-- Independent Height Slider -->
+                    <div class="bg-slate-950/50 p-3 rounded-xl border border-slate-800/80">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-slate-300 font-semibold flex items-center gap-1">
+                                <i data-lucide="arrow-up-down" class="w-3.5 h-3.5 text-blue-400"></i> Ubah PANJANG Saja
+                            </span>
+                            <span id="valHeight" class="font-bold text-blue-400">200 px</span>
                         </div>
+                        <input type="range" id="heightInput" min="40" max="800" value="200" oninput="updateFromSliders('height')" class="w-full accent-blue-500">
                     </div>
 
                     <!-- Position Sliders -->
-                    <div class="grid grid-cols-2 gap-3 pt-1 border-t border-slate-800">
+                    <div class="grid grid-cols-2 gap-3 pt-2 border-t border-slate-800">
                         <div>
                             <div class="flex justify-between text-xs text-slate-400 mb-1">
                                 <span>Posisi X</span>
@@ -262,10 +258,10 @@
 
         // State Engine
         let templateImage = null;
-        let logoMode = 'google'; // 'none', 'google', 'custom'
+        let logoMode = 'google'; 
         let customLogoImage = null;
         let showGuides = true;
-        let lockAspect = true;
+        let lockAspect = false; // Default: un-locked for individual width/height tuning
 
         // Interactive QR Code Box State
         let qrBox = { x: 300, y: 300, w: 200, h: 200, radius: 16 };
@@ -415,17 +411,6 @@
         function moveQR(dx, dy) {
             qrBox.x += dx;
             qrBox.y += dy;
-            syncSliders();
-            renderCanvas();
-        }
-
-        function resizeQR(delta) {
-            qrBox.w = Math.max(40, qrBox.w + delta);
-            if (lockAspect) {
-                qrBox.h = qrBox.w;
-            } else {
-                qrBox.h = Math.max(40, qrBox.h + delta);
-            }
             syncSliders();
             renderCanvas();
         }
