@@ -33,8 +33,8 @@
                     <i data-lucide="qr-code" class="w-6 h-6"></i>
                 </div>
                 <div>
-                    <h1 class="font-bold text-lg leading-none text-white">QR Poster Builder</h1>
-                    <p class="text-xs text-slate-400 mt-1">Upload Templat, Custom Logo & Interactive Drag-Resize QR</p>
+                    <h1 class="font-bold text-lg leading-none text-white">QR Poster Studio Pro</h1>
+                    <p class="text-xs text-slate-400 mt-1">Upload Templat, Keyboard Nav & Flexible Calibration</p>
                 </div>
             </div>
             <div class="flex items-center gap-2">
@@ -50,7 +50,7 @@
     <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
         
         <!-- Left Sidebar: Controls -->
-        <div class="lg:col-span-4 space-y-6">
+        <div class="lg:col-span-5 space-y-6">
             
             <!-- Step 1: Upload Template -->
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
@@ -65,7 +65,7 @@
                     <span class="text-xs text-slate-400 font-normal">Format PNG, JPG, WEBP (A5, 10x10 cm, dll)</span>
                 </button>
                 <p id="templateFileName" class="text-xs text-emerald-400 mt-2 font-medium hidden flex items-center gap-1">
-                    <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Templat berhasil dimuat
+                    <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> <span id="templateNameText">Templat berhasil dimuat</span>
                 </p>
             </div>
 
@@ -73,7 +73,7 @@
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
                 <label class="block text-sm font-semibold text-slate-200 mb-2 flex items-center gap-2">
                     <i data-lucide="link" class="w-4 h-4 text-blue-400"></i>
-                    2. Tautan URL / Link
+                    2. Tautan URL / Link QR
                 </label>
                 <div class="relative">
                     <input type="url" id="qrInput" 
@@ -83,26 +83,32 @@
                 </div>
             </div>
 
-            <!-- Step 3: Custom Logo on QR Code -->
+            <!-- Step 3: Logo Options -->
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
                 <label class="block text-sm font-semibold text-slate-200 flex items-center justify-between">
                     <span class="flex items-center gap-2">
-                        <i data-lucide="shield-alert" class="w-4 h-4 text-blue-400"></i>
-                        3. Upload Custom Logo QR
+                        <i data-lucide="shield" class="w-4 h-4 text-blue-400"></i>
+                        3. Pengaturan Logo Tengah QR Code
                     </span>
                 </label>
                 
                 <input type="file" id="logoUploader" accept="image/*" onchange="loadCustomLogo(event)" class="hidden">
-                <div class="flex gap-2">
-                    <button onclick="document.getElementById('logoUploader').click()" class="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition border border-slate-700">
-                        <i data-lucide="upload" class="w-4 h-4"></i>
-                        Upload Logo Sendiri
+                
+                <div class="grid grid-cols-3 gap-2">
+                    <button onclick="setLogoMode('none')" id="btnLogoNone" class="py-2.5 px-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition border border-slate-700">
+                        <i data-lucide="ban" class="w-3.5 h-3.5"></i>
+                        Tanpa Logo
                     </button>
-                    <button onclick="removeLogo()" id="removeLogoBtn" class="py-2.5 px-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-xl text-xs font-semibold hidden transition border border-red-500/30">
-                        Hapus Logo
+                    <button onclick="setLogoMode('google')" id="btnLogoGoogle" class="py-2.5 px-2 bg-blue-600 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition shadow-lg shadow-blue-600/30">
+                        <i data-lucide="chrome" class="w-3.5 h-3.5"></i>
+                        Logo Google
+                    </button>
+                    <button onclick="document.getElementById('logoUploader').click()" id="btnLogoCustom" class="py-2.5 px-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition border border-slate-700">
+                        <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+                        Custom Logo
                     </button>
                 </div>
-                <p id="logoFileName" class="text-xs text-slate-400 italic">Default: Logo Google "G"</p>
+                <p id="logoStatusText" class="text-xs text-slate-400 italic">Mode: Logo Google Default</p>
 
                 <!-- Color Options -->
                 <div class="grid grid-cols-2 gap-4 border-t border-slate-800 pt-3">
@@ -117,31 +123,93 @@
                 </div>
             </div>
 
-            <!-- Interactive Guidance -->
-            <div class="bg-blue-950/40 border border-blue-800/50 rounded-2xl p-4 text-xs text-blue-200 space-y-1">
-                <p class="font-semibold flex items-center gap-1.5 text-blue-300">
-                    <i data-lucide="mouse-pointer" class="w-4 h-4"></i> Cara Mengatur Posisi QR Code:
-                </p>
-                <ul class="list-disc list-inside space-y-1 text-slate-300 pl-1">
-                    <li><strong class="text-white">Geser (Drag):</strong> Klik & tahan di tengah QR Code untuk memindahkan posisi.</li>
-                    <li><strong class="text-white">Ubah Ukuran (Resize):</strong> Klik & tahan bulatan di pojok kanan bawah QR Code.</li>
-                </ul>
+            <!-- Step 4: Fine-Tuning Calibration (Keyboard & Sliders) -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
+                <label class="block text-sm font-semibold text-slate-200 flex items-center justify-between">
+                    <span class="flex items-center gap-2">
+                        <i data-lucide="sliders" class="w-4 h-4 text-blue-400"></i>
+                        4. Kalibrasi Manual (X, Y & Scale)
+                    </span>
+                    <button onclick="resetPosition()" class="text-xs text-blue-400 hover:underline">Reset Posisi</button>
+                </label>
+
+                <!-- Visual Arrow Buttons & Scale Controls -->
+                <div class="flex items-center justify-between gap-4 border-b border-slate-800 pb-4">
+                    <div class="flex flex-col items-center">
+                        <span class="text-[10px] text-slate-400 mb-1">Navigasi Tombol</span>
+                        <div class="grid grid-cols-3 gap-1 w-28">
+                            <div></div>
+                            <button onclick="moveQR(0, -2)" class="p-1.5 bg-slate-800 hover:bg-slate-700 rounded text-center"><i data-lucide="chevron-up" class="w-4 h-4 mx-auto"></i></button>
+                            <div></div>
+                            <button onclick="moveQR(-2, 0)" class="p-1.5 bg-slate-800 hover:bg-slate-700 rounded text-center"><i data-lucide="chevron-left" class="w-4 h-4 mx-auto"></i></button>
+                            <button onclick="moveQR(0, 2)" class="p-1.5 bg-slate-800 hover:bg-slate-700 rounded text-center"><i data-lucide="chevron-down" class="w-4 h-4 mx-auto"></i></button>
+                            <button onclick="moveQR(2, 0)" class="p-1.5 bg-slate-800 hover:bg-slate-700 rounded text-center"><i data-lucide="chevron-right" class="w-4 h-4 mx-auto"></i></button>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2 flex-1">
+                        <span class="text-[10px] text-slate-400">Pengaturan Ukuran Cepat</span>
+                        <div class="flex gap-2">
+                            <button onclick="resizeQR(-10)" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs font-bold border border-slate-700 flex items-center justify-center gap-1">
+                                <i data-lucide="minus" class="w-3.5 h-3.5"></i> Kecilkan
+                            </button>
+                            <button onclick="resizeQR(10)" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs font-bold border border-slate-700 flex items-center justify-center gap-1">
+                                <i data-lucide="plus" class="w-3.5 h-3.5"></i> Besarkan
+                            </button>
+                        </div>
+                        <p class="text-[10px] text-slate-400 italic">💡 Anda juga bisa gunakan tombol Panah Keyboard (`Up`, `Down`, `Left`, `Right`)</p>
+                    </div>
+                </div>
+
+                <!-- Sliders for Manual Value Adjustment -->
+                <div class="space-y-3">
+                    <div>
+                        <div class="flex justify-between text-xs text-slate-400 mb-1">
+                            <span>Ukuran QR (Lebar/Tinggi)</span>
+                            <span id="valSize">200 px</span>
+                        </div>
+                        <input type="range" id="sizeInput" min="50" max="600" value="200" oninput="updateFromSliders()" class="w-full accent-blue-500">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <div class="flex justify-between text-xs text-slate-400 mb-1">
+                                <span>Posisi X</span>
+                                <span id="valX">300</span>
+                            </div>
+                            <input type="range" id="posXInput" min="0" max="1000" value="300" oninput="updateFromSliders()" class="w-full accent-blue-500">
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs text-slate-400 mb-1">
+                                <span>Posisi Y</span>
+                                <span id="valY">300</span>
+                            </div>
+                            <input type="range" id="posYInput" min="0" max="1000" value="300" oninput="updateFromSliders()" class="w-full accent-blue-500">
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
         </div>
 
         <!-- Right Preview Canvas -->
-        <div class="lg:col-span-8 flex flex-col items-center justify-start space-y-4">
+        <div class="lg:col-span-7 flex flex-col items-center justify-start space-y-4">
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 w-full flex flex-col items-center justify-center shadow-2xl relative min-h-[550px] overflow-hidden">
                 
                 <div class="absolute top-4 left-4 flex items-center gap-2 bg-slate-950/80 px-3 py-1.5 rounded-full border border-slate-800 z-10">
                     <i data-lucide="move" class="w-3.5 h-3.5 text-blue-400"></i>
-                    <span class="text-xs text-slate-300 font-medium">Interactive Canvas Mode</span>
+                    <span class="text-xs text-slate-300 font-medium">Pratinjau Interaktif</span>
+                </div>
+
+                <div class="absolute top-4 right-4 z-10">
+                    <button onclick="toggleGuides()" id="btnToggleGuides" class="bg-slate-950/80 hover:bg-slate-800 px-3 py-1.5 rounded-full border border-slate-800 text-xs text-slate-300 flex items-center gap-1.5 transition">
+                        <i data-lucide="eye" class="w-3.5 h-3.5 text-blue-400"></i>
+                        <span>Sembunyikan Garis Panduan</span>
+                    </button>
                 </div>
 
                 <!-- Canvas Preview -->
-                <div class="relative max-w-full overflow-auto flex items-center justify-center p-2">
-                    <canvas id="posterCanvas" class="max-h-[70vh] w-auto h-auto rounded-lg shadow-2xl cursor-grab border border-slate-800"></canvas>
+                <div class="relative max-w-full overflow-auto flex items-center justify-center p-2 mt-8">
+                    <canvas id="posterCanvas" tabindex="0" class="max-h-[70vh] w-auto h-auto rounded-lg shadow-2xl cursor-grab border border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"></canvas>
                 </div>
 
             </div>
@@ -166,29 +234,30 @@
     <script>
         lucide.createIcons();
 
-        // Canvas & Interactive State
+        // State Engine
         let templateImage = null;
+        let logoMode = 'google'; // 'none', 'google', 'custom'
         let customLogoImage = null;
-        let isDefaultLogo = true;
+        let showGuides = true;
 
-        // Interactive QR Code Position & Bounds
+        // Interactive QR Code Box State
         let qrBox = { x: 300, y: 300, w: 200, h: 200 };
         let isDragging = false;
         let isResizing = false;
         let dragOffsetX = 0;
         let dragOffsetY = 0;
-        const handleSize = 16; // Resize handle size
+        const handleSize = 16;
 
         const canvas = document.getElementById('posterCanvas');
         const ctx = canvas.getContext('2d');
 
         // Load Default Google Logo
-        const defaultLogo = new Image();
-        defaultLogo.crossOrigin = "anonymous";
-        defaultLogo.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="%234285F4" d="M386 400c45-42 65-104 53-168H260v90h102c-10 40-37 72-72 90v48h68c40-37 64-92 64-160z"/><path fill="%2334A853" d="M260 496c65 0 120-22 160-60l-68-48c-22 15-51 24-92 24-72 0-133-48-155-114H35v52c40 80 123 146 225 146z"/><path fill="%23FBBC05" d="M105 298c-6-18-9-37-9-58s3-40 9-58v-52H35C13 172 0 213 0 260s13 88 35 130l70-52z"/><path fill="%23EA4335" d="M260 100c36 0 68 13 93 37l68-68C380 32 325 8 260 8 158 8 75 74 35 154l70 52c22-66 83-106 155-106z"/></svg>';
-        defaultLogo.onload = () => { if (isDefaultLogo) customLogoImage = defaultLogo; };
+        const defaultGoogleLogo = new Image();
+        defaultGoogleLogo.crossOrigin = "anonymous";
+        defaultGoogleLogo.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="%234285F4" d="M386 400c45-42 65-104 53-168H260v90h102c-10 40-37 72-72 90v48h68c40-37 64-92 64-160z"/><path fill="%2334A853" d="M260 496c65 0 120-22 160-60l-68-48c-22 15-51 24-92 24-72 0-133-48-155-114H35v52c40 80 123 146 225 146z"/><path fill="%23FBBC05" d="M105 298c-6-18-9-37-9-58s3-40 9-58v-52H35C13 172 0 213 0 260s13 88 35 130l70-52z"/><path fill="%23EA4335" d="M260 100c36 0 68 13 93 37l68-68C380 32 325 8 260 8 158 8 75 74 35 154l70 52c22-66 83-106 155-106z"/></svg>';
+        defaultGoogleLogo.onload = () => { renderCanvas(); };
 
-        // 1. Template Upload Handler
+        // 1. Load Template
         function loadCustomTemplate(e) {
             const file = e.target.files[0];
             if (file) {
@@ -197,14 +266,20 @@
                     const img = new Image();
                     img.onload = function() {
                         templateImage = img;
-                        // Center QR box inside new template
-                        qrBox.w = Math.min(img.width, img.height) * 0.3;
+                        // Center QR box inside new template dimensions
+                        qrBox.w = Math.round(Math.min(img.width, img.height) * 0.3);
                         qrBox.h = qrBox.w;
-                        qrBox.x = (img.width - qrBox.w) / 2;
-                        qrBox.y = (img.height - qrBox.h) / 2;
+                        qrBox.x = Math.round((img.width - qrBox.w) / 2);
+                        qrBox.y = Math.round((img.height - qrBox.h) / 2);
 
-                        document.getElementById('templateFileName').innerText = `Templat: ${file.name}`;
+                        // Update Sliders max values to match image dimensions
+                        document.getElementById('posXInput').max = img.width;
+                        document.getElementById('posYInput').max = img.height;
+                        document.getElementById('sizeInput').max = Math.min(img.width, img.height);
+
+                        document.getElementById('templateNameText').innerText = `Templat: ${file.name}`;
                         document.getElementById('templateFileName').classList.remove('hidden');
+                        syncSliders();
                         renderCanvas();
                     }
                     img.src = event.target.result;
@@ -213,7 +288,31 @@
             }
         }
 
-        // 2. Custom Logo Handler
+        // 2. Logo Modes
+        function setLogoMode(mode) {
+            logoMode = mode;
+            const btnNone = document.getElementById('btnLogoNone');
+            const btnGoogle = document.getElementById('btnLogoGoogle');
+            const btnCustom = document.getElementById('btnLogoCustom');
+            const statusText = document.getElementById('logoStatusText');
+
+            [btnNone, btnGoogle, btnCustom].forEach(btn => {
+                btn.className = "py-2.5 px-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition border border-slate-700";
+            });
+
+            if (mode === 'none') {
+                btnNone.className = "py-2.5 px-2 bg-blue-600 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition shadow-lg shadow-blue-600/30";
+                statusText.innerText = "Mode: Polos (Tanpa Logo)";
+            } else if (mode === 'google') {
+                btnGoogle.className = "py-2.5 px-2 bg-blue-600 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition shadow-lg shadow-blue-600/30";
+                statusText.innerText = "Mode: Logo Google Default";
+            } else if (mode === 'custom') {
+                btnCustom.className = "py-2.5 px-2 bg-blue-600 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition shadow-lg shadow-blue-600/30";
+                statusText.innerText = "Mode: Custom Logo Terunggah";
+            }
+            renderCanvas();
+        }
+
         function loadCustomLogo(e) {
             const file = e.target.files[0];
             if (file) {
@@ -222,10 +321,7 @@
                     const img = new Image();
                     img.onload = function() {
                         customLogoImage = img;
-                        isDefaultLogo = false;
-                        document.getElementById('logoFileName').innerText = `Logo: ${file.name}`;
-                        document.getElementById('removeLogoBtn').classList.remove('hidden');
-                        renderCanvas();
+                        setLogoMode('custom');
                     }
                     img.src = event.target.result;
                 }
@@ -233,19 +329,86 @@
             }
         }
 
-        function removeLogo() {
-            customLogoImage = null;
-            isDefaultLogo = false;
-            document.getElementById('logoFileName').innerText = "Tanpa Logo";
-            document.getElementById('removeLogoBtn').classList.add('hidden');
+        // 3. Calibration Controls (Keyboard & Sliders)
+        function syncSliders() {
+            document.getElementById('sizeInput').value = qrBox.w;
+            document.getElementById('posXInput').value = qrBox.x;
+            document.getElementById('posYInput').value = qrBox.y;
+
+            document.getElementById('valSize').innerText = `${Math.round(qrBox.w)} px`;
+            document.getElementById('valX').innerText = Math.round(qrBox.x);
+            document.getElementById('valY').innerText = Math.round(qrBox.y);
+        }
+
+        function updateFromSliders() {
+            qrBox.w = parseInt(document.getElementById('sizeInput').value);
+            qrBox.h = qrBox.w;
+            qrBox.x = parseInt(document.getElementById('posXInput').value);
+            qrBox.y = parseInt(document.getElementById('posYInput').value);
+            
+            document.getElementById('valSize').innerText = `${qrBox.w} px`;
+            document.getElementById('valX').innerText = qrBox.x;
+            document.getElementById('valY').innerText = qrBox.y;
+
             renderCanvas();
         }
 
-        // 3. Render Engine
-        function renderCanvas() {
+        function moveQR(dx, dy) {
+            qrBox.x += dx;
+            qrBox.y += dy;
+            syncSliders();
+            renderCanvas();
+        }
+
+        function resizeQR(delta) {
+            qrBox.w = Math.max(40, qrBox.w + delta);
+            qrBox.h = qrBox.w;
+            syncSliders();
+            renderCanvas();
+        }
+
+        function resetPosition() {
+            if (templateImage) {
+                qrBox.w = Math.round(Math.min(templateImage.width, templateImage.height) * 0.3);
+                qrBox.h = qrBox.w;
+                qrBox.x = Math.round((templateImage.width - qrBox.w) / 2);
+                qrBox.y = Math.round((templateImage.height - qrBox.h) / 2);
+            } else {
+                qrBox = { x: 300, y: 300, w: 200, h: 200 };
+            }
+            syncSliders();
+            renderCanvas();
+        }
+
+        function toggleGuides() {
+            showGuides = !showGuides;
+            const btn = document.getElementById('btnToggleGuides');
+            if (showGuides) {
+                btn.innerHTML = '<i data-lucide="eye" class="w-3.5 h-3.5 text-blue-400"></i><span>Sembunyikan Garis Panduan</span>';
+            } else {
+                btn.innerHTML = '<i data-lucide="eye-off" class="w-3.5 h-3.5 text-slate-400"></i><span>Tampilkan Garis Panduan</span>';
+            }
+            lucide.createIcons();
+            renderCanvas();
+        }
+
+        // Keyboard Listener
+        window.addEventListener('keydown', (e) => {
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+                // Prevent scrolling page with arrows
+                e.preventDefault();
+                const step = e.shiftKey ? 10 : 2;
+                if (e.key === 'ArrowUp') moveQR(0, -step);
+                if (e.key === 'ArrowDown') moveQR(0, step);
+                if (e.key === 'ArrowLeft') moveQR(-step, 0);
+                if (e.key === 'ArrowRight') moveQR(step, 0);
+            }
+        });
+
+        // 4. Render Engine
+        function renderCanvas(drawGuides = showGuides) {
             const urlText = document.getElementById('qrInput').value.trim() || 'https://g.page/r/c/review';
 
-            // Dimensions setup
             if (templateImage) {
                 canvas.width = templateImage.width;
                 canvas.height = templateImage.height;
@@ -258,10 +421,9 @@
             if (templateImage) {
                 ctx.drawImage(templateImage, 0, 0, canvas.width, canvas.height);
             } else {
-                // Placeholder if no template uploaded yet
                 ctx.fillStyle = '#1e293b';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = '#64748b';
+                ctx.fillStyle = '#94a3b8';
                 ctx.font = 'bold 28px "Plus Jakarta Sans", sans-serif';
                 ctx.textAlign = 'center';
                 ctx.fillText('Silakan Upload Gambar Templat Desain Anda (Langkah 1)', canvas.width / 2, canvas.height / 2);
@@ -291,39 +453,42 @@
                         // Draw QR Code Image
                         ctx.drawImage(qrImageObj, qrBox.x, qrBox.y, qrBox.w, qrBox.h);
 
-                        // Draw Custom Logo in Center
-                        if (customLogoImage) {
+                        // Draw Logo depending on Mode
+                        let logoToDraw = null;
+                        if (logoMode === 'google') logoToDraw = defaultGoogleLogo;
+                        if (logoMode === 'custom') logoToDraw = customLogoImage;
+
+                        if (logoToDraw) {
                             const logoSize = qrBox.w * 0.22;
                             const logoX = qrBox.x + (qrBox.w - logoSize) / 2;
                             const logoY = qrBox.y + (qrBox.h - logoSize) / 2;
 
-                            // White background circle for logo
                             ctx.fillStyle = '#ffffff';
                             ctx.beginPath();
                             ctx.arc(logoX + logoSize/2, logoY + logoSize/2, logoSize/1.8, 0, Math.PI * 2);
                             ctx.fill();
 
-                            ctx.drawImage(customLogoImage, logoX, logoY, logoSize, logoSize);
+                            ctx.drawImage(logoToDraw, logoX, logoY, logoSize, logoSize);
                         }
 
-                        // Draw Interactive Border Selection Overlay
-                        drawInteractiveControls();
+                        // Draw Interactive Controls ONLY if enabled
+                        if (drawGuides) {
+                            drawInteractiveControls();
+                        }
                     };
                     qrImageObj.src = qrImg.src;
                 }
             }, 50);
         }
 
-        // Draw Interactive Selection Controls (Border + Handle)
         function drawInteractiveControls() {
             ctx.save();
-            // Selection Dashed Border
             ctx.strokeStyle = '#3b82f6';
             ctx.lineWidth = 3;
             ctx.setLineDash([8, 6]);
             ctx.strokeRect(qrBox.x, qrBox.y, qrBox.w, qrBox.h);
 
-            // Corner Resize Handle (Bottom Right)
+            // Handle
             ctx.setLineDash([]);
             ctx.fillStyle = '#3b82f6';
             ctx.strokeStyle = '#ffffff';
@@ -336,7 +501,7 @@
             ctx.restore();
         }
 
-        // Pointer / Mouse Coordinates Helper
+        // Pointer Event Handlers
         function getCanvasCoordinates(e) {
             const rect = canvas.getBoundingClientRect();
             const scaleX = canvas.width / rect.width;
@@ -351,11 +516,9 @@
             };
         }
 
-        // Mouse & Touch Event Listeners for Drag & Resize
         function handlePointerDown(e) {
             const pos = getCanvasCoordinates(e);
 
-            // Check if clicking on bottom-right resize handle
             const handleX = qrBox.x + qrBox.w;
             const handleY = qrBox.y + qrBox.h;
             const distToHandle = Math.hypot(pos.x - handleX, pos.y - handleY);
@@ -374,16 +537,17 @@
             const pos = getCanvasCoordinates(e);
 
             if (isResizing) {
-                const newWidth = Math.max(80, pos.x - qrBox.x);
+                const newWidth = Math.max(40, pos.x - qrBox.x);
                 qrBox.w = newWidth;
-                qrBox.h = newWidth; // Keep square aspect ratio
+                qrBox.h = newWidth;
+                syncSliders();
                 renderCanvas();
             } else if (isDragging) {
                 qrBox.x = pos.x - dragOffsetX;
                 qrBox.y = pos.y - dragOffsetY;
+                syncSliders();
                 renderCanvas();
             } else {
-                // Update cursor on hover
                 const handleX = qrBox.x + qrBox.w;
                 const handleY = qrBox.y + qrBox.h;
                 const distToHandle = Math.hypot(pos.x - handleX, pos.y - handleY);
@@ -404,7 +568,6 @@
             canvas.style.cursor = 'default';
         }
 
-        // Event Attachments
         canvas.addEventListener('mousedown', handlePointerDown);
         canvas.addEventListener('mousemove', handlePointerMove);
         window.addEventListener('mouseup', handlePointerUp);
@@ -413,45 +576,24 @@
         canvas.addEventListener('touchmove', handlePointerMove);
         window.addEventListener('touchend', handlePointerUp);
 
-        // Download PNG tanpa overlay garis kontrol
+        // Export Function (TIDAK TERIKUT GARIS BANTU)
         function downloadPoster() {
-            renderCanvas();
+            // Force re-render WITHOUT guides
+            renderCanvas(false);
+            
             setTimeout(() => {
-                // Temporarily re-render without interactive overlay for clean download
-                if (templateImage) ctx.drawImage(templateImage, 0, 0, canvas.width, canvas.height);
-                
-                const hiddenQrDiv = document.getElementById('qrcode-hidden');
-                const qrImg = hiddenQrDiv.querySelector('img');
-                
-                if (qrImg) {
-                    const qrImageObj = new Image();
-                    qrImageObj.onload = function() {
-                        ctx.drawImage(qrImageObj, qrBox.x, qrBox.y, qrBox.w, qrBox.h);
-                        if (customLogoImage) {
-                            const logoSize = qrBox.w * 0.22;
-                            const logoX = qrBox.x + (qrBox.w - logoSize) / 2;
-                            const logoY = qrBox.y + (qrBox.h - logoSize) / 2;
-                            ctx.fillStyle = '#ffffff';
-                            ctx.beginPath();
-                            ctx.arc(logoX + logoSize/2, logoY + logoSize/2, logoSize/1.8, 0, Math.PI * 2);
-                            ctx.fill();
-                            ctx.drawImage(customLogoImage, logoX, logoY, logoSize, logoSize);
-                        }
+                const link = document.createElement('a');
+                link.download = `QR-Poster-${Date.now()}.png`;
+                link.href = canvas.toDataURL('image/png', 1.0);
+                link.click();
 
-                        const link = document.createElement('a');
-                        link.download = `QR-Poster-${Date.now()}.png`;
-                        link.href = canvas.toDataURL('image/png', 1.0);
-                        link.click();
-
-                        // Restore controls
-                        renderCanvas();
-                    };
-                    qrImageObj.src = qrImg.src;
-                }
+                // Restore guides view
+                renderCanvas(showGuides);
             }, 100);
         }
 
         window.onload = function() {
+            syncSliders();
             renderCanvas();
         };
 
