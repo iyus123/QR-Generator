@@ -34,7 +34,7 @@
                 </div>
                 <div>
                     <h1 class="font-bold text-lg leading-none text-white">QR Poster Studio Pro</h1>
-                    <p class="text-xs text-slate-400 mt-1">Upload Templat, Keyboard Nav & Flexible Calibration</p>
+                    <p class="text-xs text-slate-400 mt-1">Upload Templat, Keyboard Nav, Kelancipan Sudut & Kalibrasi</p>
                 </div>
             </div>
             <div class="flex items-center gap-2">
@@ -123,12 +123,12 @@
                 </div>
             </div>
 
-            <!-- Step 4: Fine-Tuning Calibration (Keyboard & Sliders) -->
+            <!-- Step 4: Fine-Tuning Calibration (X, Y, Scale & Radius) -->
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
                 <label class="block text-sm font-semibold text-slate-200 flex items-center justify-between">
                     <span class="flex items-center gap-2">
                         <i data-lucide="sliders" class="w-4 h-4 text-blue-400"></i>
-                        4. Kalibrasi Manual (X, Y & Scale)
+                        4. Kalibrasi Manual & Kelancipan
                     </span>
                     <button onclick="resetPosition()" class="text-xs text-blue-400 hover:underline">Reset Posisi</button>
                 </label>
@@ -156,12 +156,23 @@
                                 <i data-lucide="plus" class="w-3.5 h-3.5"></i> Besarkan
                             </button>
                         </div>
-                        <p class="text-[10px] text-slate-400 italic">💡 Anda juga bisa gunakan tombol Panah Keyboard (`Up`, `Down`, `Left`, `Right`)</p>
+                        <p class="text-[10px] text-slate-400 italic">💡 Anda juga bisa gunakan Panah Keyboard (`Up`, `Down`, `Left`, `Right`)</p>
                     </div>
                 </div>
 
                 <!-- Sliders for Manual Value Adjustment -->
                 <div class="space-y-3">
+                    <!-- Corner Radius Slider -->
+                    <div>
+                        <div class="flex justify-between text-xs text-slate-400 mb-1">
+                            <span class="flex items-center gap-1">
+                                <i data-lucide="square" class="w-3.5 h-3.5 text-blue-400"></i> Kelancipan / Lengkungan Sudut (Radius)
+                            </span>
+                            <span id="valRadius" class="font-bold text-blue-400">16 px</span>
+                        </div>
+                        <input type="range" id="radiusInput" min="0" max="60" value="16" oninput="updateFromSliders()" class="w-full accent-blue-500">
+                    </div>
+
                     <div>
                         <div class="flex justify-between text-xs text-slate-400 mb-1">
                             <span>Ukuran QR (Lebar/Tinggi)</span>
@@ -169,6 +180,7 @@
                         </div>
                         <input type="range" id="sizeInput" min="50" max="600" value="200" oninput="updateFromSliders()" class="w-full accent-blue-500">
                     </div>
+
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <div class="flex justify-between text-xs text-slate-400 mb-1">
@@ -241,7 +253,7 @@
         let showGuides = true;
 
         // Interactive QR Code Box State
-        let qrBox = { x: 300, y: 300, w: 200, h: 200 };
+        let qrBox = { x: 300, y: 300, w: 200, h: 200, radius: 16 };
         let isDragging = false;
         let isResizing = false;
         let dragOffsetX = 0;
@@ -257,6 +269,22 @@
         defaultGoogleLogo.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="%234285F4" d="M386 400c45-42 65-104 53-168H260v90h102c-10 40-37 72-72 90v48h68c40-37 64-92 64-160z"/><path fill="%2334A853" d="M260 496c65 0 120-22 160-60l-68-48c-22 15-51 24-92 24-72 0-133-48-155-114H35v52c40 80 123 146 225 146z"/><path fill="%23FBBC05" d="M105 298c-6-18-9-37-9-58s3-40 9-58v-52H35C13 172 0 213 0 260s13 88 35 130l70-52z"/><path fill="%23EA4335" d="M260 100c36 0 68 13 93 37l68-68C380 32 325 8 260 8 158 8 75 74 35 154l70 52c22-66 83-106 155-106z"/></svg>';
         defaultGoogleLogo.onload = () => { renderCanvas(); };
 
+        // Helper to draw Rounded Clip Path
+        function drawRoundedPath(ctx, x, y, width, height, radius) {
+            const r = Math.min(radius, width / 2, height / 2);
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.lineTo(x + width - r, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+            ctx.lineTo(x + width, y + height - r);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+            ctx.lineTo(x + r, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+            ctx.lineTo(x, y + r);
+            ctx.quadraticCurveTo(x, y, x + r, y);
+            ctx.closePath();
+        }
+
         // 1. Load Template
         function loadCustomTemplate(e) {
             const file = e.target.files[0];
@@ -266,13 +294,11 @@
                     const img = new Image();
                     img.onload = function() {
                         templateImage = img;
-                        // Center QR box inside new template dimensions
                         qrBox.w = Math.round(Math.min(img.width, img.height) * 0.3);
                         qrBox.h = qrBox.w;
                         qrBox.x = Math.round((img.width - qrBox.w) / 2);
                         qrBox.y = Math.round((img.height - qrBox.h) / 2);
 
-                        // Update Sliders max values to match image dimensions
                         document.getElementById('posXInput').max = img.width;
                         document.getElementById('posYInput').max = img.height;
                         document.getElementById('sizeInput').max = Math.min(img.width, img.height);
@@ -329,15 +355,17 @@
             }
         }
 
-        // 3. Calibration Controls (Keyboard & Sliders)
+        // 3. Calibration Controls
         function syncSliders() {
             document.getElementById('sizeInput').value = qrBox.w;
             document.getElementById('posXInput').value = qrBox.x;
             document.getElementById('posYInput').value = qrBox.y;
+            document.getElementById('radiusInput').value = qrBox.radius;
 
             document.getElementById('valSize').innerText = `${Math.round(qrBox.w)} px`;
             document.getElementById('valX').innerText = Math.round(qrBox.x);
             document.getElementById('valY').innerText = Math.round(qrBox.y);
+            document.getElementById('valRadius').innerText = `${Math.round(qrBox.radius)} px`;
         }
 
         function updateFromSliders() {
@@ -345,10 +373,12 @@
             qrBox.h = qrBox.w;
             qrBox.x = parseInt(document.getElementById('posXInput').value);
             qrBox.y = parseInt(document.getElementById('posYInput').value);
+            qrBox.radius = parseInt(document.getElementById('radiusInput').value);
             
             document.getElementById('valSize').innerText = `${qrBox.w} px`;
             document.getElementById('valX').innerText = qrBox.x;
             document.getElementById('valY').innerText = qrBox.y;
+            document.getElementById('valRadius').innerText = `${qrBox.radius} px`;
 
             renderCanvas();
         }
@@ -374,8 +404,9 @@
                 qrBox.x = Math.round((templateImage.width - qrBox.w) / 2);
                 qrBox.y = Math.round((templateImage.height - qrBox.h) / 2);
             } else {
-                qrBox = { x: 300, y: 300, w: 200, h: 200 };
+                qrBox.x = 300; qrBox.y = 300; qrBox.w = 200; qrBox.h = 200;
             }
+            qrBox.radius = 16;
             syncSliders();
             renderCanvas();
         }
@@ -395,7 +426,6 @@
         // Keyboard Listener
         window.addEventListener('keydown', (e) => {
             if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
-                // Prevent scrolling page with arrows
                 e.preventDefault();
                 const step = e.shiftKey ? 10 : 2;
                 if (e.key === 'ArrowUp') moveQR(0, -step);
@@ -450,8 +480,19 @@
                 if (qrImg && qrImg.src) {
                     const qrImageObj = new Image();
                     qrImageObj.onload = function() {
-                        // Draw QR Code Image
+                        
+                        // Apply Rounded Corner Clip to QR Code
+                        ctx.save();
+                        drawRoundedPath(ctx, qrBox.x, qrBox.y, qrBox.w, qrBox.h, qrBox.radius);
+                        ctx.clip();
+
+                        // Fill Background Color for rounded corners
+                        ctx.fillStyle = qrBgColor;
+                        ctx.fill();
+
+                        // Draw QR Image
                         ctx.drawImage(qrImageObj, qrBox.x, qrBox.y, qrBox.w, qrBox.h);
+                        ctx.restore();
 
                         // Draw Logo depending on Mode
                         let logoToDraw = null;
@@ -486,7 +527,8 @@
             ctx.strokeStyle = '#3b82f6';
             ctx.lineWidth = 3;
             ctx.setLineDash([8, 6]);
-            ctx.strokeRect(qrBox.x, qrBox.y, qrBox.w, qrBox.h);
+            drawRoundedPath(ctx, qrBox.x, qrBox.y, qrBox.w, qrBox.h, qrBox.radius);
+            ctx.stroke();
 
             // Handle
             ctx.setLineDash([]);
@@ -578,7 +620,6 @@
 
         // Export Function (TIDAK TERIKUT GARIS BANTU)
         function downloadPoster() {
-            // Force re-render WITHOUT guides
             renderCanvas(false);
             
             setTimeout(() => {
@@ -587,7 +628,6 @@
                 link.href = canvas.toDataURL('image/png', 1.0);
                 link.click();
 
-                // Restore guides view
                 renderCanvas(showGuides);
             }, 100);
         }
