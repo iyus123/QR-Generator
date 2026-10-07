@@ -34,7 +34,7 @@
                 </div>
                 <div>
                     <h1 class="font-bold text-lg leading-none text-white">QR Poster Studio Pro</h1>
-                    <p class="text-xs text-slate-400 mt-1">Upload Templat, Keyboard Nav, Kelancipan Sudut & Kalibrasi</p>
+                    <p class="text-xs text-slate-400 mt-1">Upload Templat, Custom Dimensi (Panjang & Lebar) & Kelancipan</p>
                 </div>
             </div>
             <div class="flex items-center gap-2">
@@ -123,12 +123,12 @@
                 </div>
             </div>
 
-            <!-- Step 4: Fine-Tuning Calibration (X, Y, Scale & Radius) -->
+            <!-- Step 4: Fine-Tuning Calibration (X, Y, Width, Height & Radius) -->
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
                 <label class="block text-sm font-semibold text-slate-200 flex items-center justify-between">
                     <span class="flex items-center gap-2">
                         <i data-lucide="sliders" class="w-4 h-4 text-blue-400"></i>
-                        4. Kalibrasi Manual & Kelancipan
+                        4. Dimensi, Kelancipan & Kalibrasi Manual
                     </span>
                     <button onclick="resetPosition()" class="text-xs text-blue-400 hover:underline">Reset Posisi</button>
                 </label>
@@ -147,7 +147,10 @@
                         </div>
                     </div>
                     <div class="flex flex-col gap-2 flex-1">
-                        <span class="text-[10px] text-slate-400">Pengaturan Ukuran Cepat</span>
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] text-slate-400">Kunci Rasio Persegi (1:1)</span>
+                            <input type="checkbox" id="keepAspect" checked onchange="toggleAspectLock()" class="w-3.5 h-3.5 accent-blue-500 rounded cursor-pointer">
+                        </div>
                         <div class="flex gap-2">
                             <button onclick="resizeQR(-10)" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs font-bold border border-slate-700 flex items-center justify-center gap-1">
                                 <i data-lucide="minus" class="w-3.5 h-3.5"></i> Kecilkan
@@ -156,7 +159,7 @@
                                 <i data-lucide="plus" class="w-3.5 h-3.5"></i> Besarkan
                             </button>
                         </div>
-                        <p class="text-[10px] text-slate-400 italic">💡 Anda juga bisa gunakan Panah Keyboard (`Up`, `Down`, `Left`, `Right`)</p>
+                        <p class="text-[10px] text-slate-400 italic">💡 Gunakan Panah Keyboard (`Up`, `Down`, `Left`, `Right`)</p>
                     </div>
                 </div>
 
@@ -166,22 +169,33 @@
                     <div>
                         <div class="flex justify-between text-xs text-slate-400 mb-1">
                             <span class="flex items-center gap-1">
-                                <i data-lucide="square" class="w-3.5 h-3.5 text-blue-400"></i> Kelancipan / Lengkungan Sudut (Radius)
+                                <i data-lucide="square" class="w-3.5 h-3.5 text-blue-400"></i> Kelancipan Sudut (Radius)
                             </span>
                             <span id="valRadius" class="font-bold text-blue-400">16 px</span>
                         </div>
                         <input type="range" id="radiusInput" min="0" max="60" value="16" oninput="updateFromSliders()" class="w-full accent-blue-500">
                     </div>
 
-                    <div>
-                        <div class="flex justify-between text-xs text-slate-400 mb-1">
-                            <span>Ukuran QR (Lebar/Tinggi)</span>
-                            <span id="valSize">200 px</span>
+                    <!-- Independent Width & Height Sliders -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <div class="flex justify-between text-xs text-slate-400 mb-1">
+                                <span>Lebar (Width)</span>
+                                <span id="valWidth" class="font-semibold text-slate-200">200 px</span>
+                            </div>
+                            <input type="range" id="widthInput" min="40" max="800" value="200" oninput="updateFromSliders('width')" class="w-full accent-blue-500">
                         </div>
-                        <input type="range" id="sizeInput" min="50" max="600" value="200" oninput="updateFromSliders()" class="w-full accent-blue-500">
+                        <div>
+                            <div class="flex justify-between text-xs text-slate-400 mb-1">
+                                <span>Tinggi / Panjang (Height)</span>
+                                <span id="valHeight" class="font-semibold text-slate-200">200 px</span>
+                            </div>
+                            <input type="range" id="heightInput" min="40" max="800" value="200" oninput="updateFromSliders('height')" class="w-full accent-blue-500">
+                        </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-3">
+                    <!-- Position Sliders -->
+                    <div class="grid grid-cols-2 gap-3 pt-1 border-t border-slate-800">
                         <div>
                             <div class="flex justify-between text-xs text-slate-400 mb-1">
                                 <span>Posisi X</span>
@@ -251,6 +265,7 @@
         let logoMode = 'google'; // 'none', 'google', 'custom'
         let customLogoImage = null;
         let showGuides = true;
+        let lockAspect = true;
 
         // Interactive QR Code Box State
         let qrBox = { x: 300, y: 300, w: 200, h: 200, radius: 16 };
@@ -301,7 +316,8 @@
 
                         document.getElementById('posXInput').max = img.width;
                         document.getElementById('posYInput').max = img.height;
-                        document.getElementById('sizeInput').max = Math.min(img.width, img.height);
+                        document.getElementById('widthInput').max = img.width;
+                        document.getElementById('heightInput').max = img.height;
 
                         document.getElementById('templateNameText').innerText = `Templat: ${file.name}`;
                         document.getElementById('templateFileName').classList.remove('hidden');
@@ -357,29 +373,42 @@
 
         // 3. Calibration Controls
         function syncSliders() {
-            document.getElementById('sizeInput').value = qrBox.w;
+            document.getElementById('widthInput').value = qrBox.w;
+            document.getElementById('heightInput').value = qrBox.h;
             document.getElementById('posXInput').value = qrBox.x;
             document.getElementById('posYInput').value = qrBox.y;
             document.getElementById('radiusInput').value = qrBox.radius;
 
-            document.getElementById('valSize').innerText = `${Math.round(qrBox.w)} px`;
+            document.getElementById('valWidth').innerText = `${Math.round(qrBox.w)} px`;
+            document.getElementById('valHeight').innerText = `${Math.round(qrBox.h)} px`;
             document.getElementById('valX').innerText = Math.round(qrBox.x);
             document.getElementById('valY').innerText = Math.round(qrBox.y);
             document.getElementById('valRadius').innerText = `${Math.round(qrBox.radius)} px`;
         }
 
-        function updateFromSliders() {
-            qrBox.w = parseInt(document.getElementById('sizeInput').value);
-            qrBox.h = qrBox.w;
+        function toggleAspectLock() {
+            lockAspect = document.getElementById('keepAspect').checked;
+            if (lockAspect) {
+                qrBox.h = qrBox.w;
+                syncSliders();
+                renderCanvas();
+            }
+        }
+
+        function updateFromSliders(changedDimension) {
+            qrBox.w = parseInt(document.getElementById('widthInput').value);
+            qrBox.h = parseInt(document.getElementById('heightInput').value);
+
+            if (lockAspect) {
+                if (changedDimension === 'width') qrBox.h = qrBox.w;
+                if (changedDimension === 'height') qrBox.w = qrBox.h;
+            }
+
             qrBox.x = parseInt(document.getElementById('posXInput').value);
             qrBox.y = parseInt(document.getElementById('posYInput').value);
             qrBox.radius = parseInt(document.getElementById('radiusInput').value);
             
-            document.getElementById('valSize').innerText = `${qrBox.w} px`;
-            document.getElementById('valX').innerText = qrBox.x;
-            document.getElementById('valY').innerText = qrBox.y;
-            document.getElementById('valRadius').innerText = `${qrBox.radius} px`;
-
+            syncSliders();
             renderCanvas();
         }
 
@@ -392,7 +421,11 @@
 
         function resizeQR(delta) {
             qrBox.w = Math.max(40, qrBox.w + delta);
-            qrBox.h = qrBox.w;
+            if (lockAspect) {
+                qrBox.h = qrBox.w;
+            } else {
+                qrBox.h = Math.max(40, qrBox.h + delta);
+            }
             syncSliders();
             renderCanvas();
         }
@@ -481,7 +514,7 @@
                     const qrImageObj = new Image();
                     qrImageObj.onload = function() {
                         
-                        // Apply Rounded Corner Clip to QR Code
+                        // Apply Rounded Corner Clip & Dimensions to QR Code
                         ctx.save();
                         drawRoundedPath(ctx, qrBox.x, qrBox.y, qrBox.w, qrBox.h, qrBox.radius);
                         ctx.clip();
@@ -490,7 +523,7 @@
                         ctx.fillStyle = qrBgColor;
                         ctx.fill();
 
-                        // Draw QR Image
+                        // Draw QR Image with Independent Width and Height
                         ctx.drawImage(qrImageObj, qrBox.x, qrBox.y, qrBox.w, qrBox.h);
                         ctx.restore();
 
@@ -500,7 +533,7 @@
                         if (logoMode === 'custom') logoToDraw = customLogoImage;
 
                         if (logoToDraw) {
-                            const logoSize = qrBox.w * 0.22;
+                            const logoSize = Math.min(qrBox.w, qrBox.h) * 0.22;
                             const logoX = qrBox.x + (qrBox.w - logoSize) / 2;
                             const logoY = qrBox.y + (qrBox.h - logoSize) / 2;
 
@@ -579,9 +612,12 @@
             const pos = getCanvasCoordinates(e);
 
             if (isResizing) {
-                const newWidth = Math.max(40, pos.x - qrBox.x);
-                qrBox.w = newWidth;
-                qrBox.h = newWidth;
+                qrBox.w = Math.max(40, pos.x - qrBox.x);
+                if (lockAspect) {
+                    qrBox.h = qrBox.w;
+                } else {
+                    qrBox.h = Math.max(40, pos.y - qrBox.y);
+                }
                 syncSliders();
                 renderCanvas();
             } else if (isDragging) {
@@ -618,7 +654,7 @@
         canvas.addEventListener('touchmove', handlePointerMove);
         window.addEventListener('touchend', handlePointerUp);
 
-        // Export Function (TIDAK TERIKUT GARIS BANTU)
+        // Export Function
         function downloadPoster() {
             renderCanvas(false);
             
