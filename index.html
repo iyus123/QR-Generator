@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generator QR Code Modern</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- QRCode.js Library CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-effect {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(156, 163, 175, 0.4);
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(156, 163, 175, 0.7);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-full font-sans transition-colors duration-200 flex flex-col">
+
+    <!-- Header Navbar -->
+    <header class="sticky top-0 z-30 bg-white/80 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800 glass-effect">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-400 flex items-center justify-center text-white shadow-md shadow-brand-500/20">
+                    <i class="fa-solid fa-qrcode text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-none bg-gradient-to-r from-brand-600 to-indigo-500 bg-clip-text text-transparent">QR Studio</h1>
+                    <span class="text-xs text-slate-500 dark:text-slate-400">Generator Kode QR Profesional</span>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2 sm:gap-4">
+                <!-- Theme Toggle Button -->
+                <button id="themeToggleBtn" class="p-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors focus:outline-none" title="Ubah Tema">
+                    <i class="fa-solid fa-moon text-lg dark:hidden"></i>
+                    <i class="fa-solid fa-sun text-lg hidden dark:block"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- LEFT PANEL: Controls & Input Forms (7 Cols) -->
+            <div class="lg:col-span-7 space-y-6">
+                
+                <!-- Preset Types Tabs -->
+                <div class="bg-white dark:bg-slate-800 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-700/60 shadow-sm flex flex-wrap gap-1">
+                    <button data-type="url" class="tab-btn flex-1 min-w-[100px] py-2 px-3 rounded-xl text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 bg-brand-600 text-white shadow-sm">
+                        <i class="fa-solid fa-link"></i> URL / Link
+                    </button>
+                    <button data-type="wifi" class="tab-btn flex-1 min-w-[100px] py-2 px-3 rounded-xl text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50">
+                        <i class="fa-solid fa-wifi"></i> Wi-Fi
+                    </button>
+                    <button data-type="email" class="tab-btn flex-1 min-w-[100px] py-2 px-3 rounded-xl text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50">
+                        <i class="fa-solid fa-envelope"></i> Email
+                    </button>
+                    <button data-type="text" class="tab-btn flex-1 min-w-[100px] py-2 px-3 rounded-xl text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50">
+                        <i class="fa-solid fa-align-left"></i> Teks Bebas
+                    </button>
+                </div>
+
+                <!-- Input Card Container -->
+                <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700/60 p-6 shadow-sm">
+                    
+                    <!-- URL Input Panel -->
+                    <div id="panel-url" class="input-panel space-y-4">
+                        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-200">
+                            Masukkan Tautan / URL Web
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                <i class="fa-solid fa-globe"></i>
+                            </div>
+                            <input type="url" id="urlInput" placeholder="https://example.com" class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all">
+                        </div>
+                    </div>
+
+                    <!-- Wi-Fi Input Panel -->
+                    <div id="panel-wifi" class="input-panel space-y-4 hidden">
+                        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-200">
+                            Pengaturan Jaringan Wi-Fi
+                        </label>
+                        <div class="space-y-3">
+                            <div>
+                                <span class="text-xs text-slate-500 dark:text-slate-400 block mb-1">Nama Jaringan (SSID)</span>
+                                <input type="text" id="wifiSsid" placeholder="Contoh: Wi-Fi Rumah" class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none">
+                            </div>
+                            <div>
+                                <span class="text-xs text-slate-500 dark:text-slate-400 block mb-1">Kata Sandi / Password</span>
+                                <input type="password" id="wifiPass" placeholder="Masukkan password Wi-Fi" class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none">
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <span class="text-xs text-slate-500 dark:text-slate-400 block mb-1">Keamanan</span>
+                                    <select id="wifiEnc" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none">
+                                        <option value="WPA">WPA / WPA2 / WPA3</option>
+                                        <option value="WEP">WEP</option>
+                                        <option value="nopass">Tanpa Kata Sandi</option>
+                                    </select>
+                                </div>
+                                <div class="flex items-end pb-2">
+                                    <label class="inline-flex items-center gap-2 cursor-pointer text-sm text-slate-600 dark:text-slate-300">
+                                        <input type="checkbox" id="wifiHidden" class="rounded border-slate-300 text-brand-600 focus:ring-brand-500 w-4 h-4">
+                                        <span>Jaringan Tersembunyi</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Email Input Panel -->
+                    <div id="panel-email" class="input-panel space-y-4 hidden">
+                        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-200">
+                            Detail Pesan Email
+                        </label>
+                        <div class="space-y-3">
+                            <input type="email" id="emailTo" placeholder="Alamat Email Tujuan (contoh: nama@email.com)" class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none">
+                            <input type="text" id="emailSub" placeholder="Subjek / Judul Email" class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none">
+                            <textarea id="emailBody" rows="3" placeholder="Isi Pesan Email..." class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none resize-none"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Plain Text Input Panel -->
+                    <div id="panel-text" class="input-panel space-y-4 hidden">
+                        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-200">
+                            Teks Bebas / Catatan
+                        </label>
+                        <textarea id="textInput" rows="4" placeholder="Tuliskan teks atau informasi apa saja di sini..." class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none resize-none"></textarea>
+                    </div>
+
+                </div>
+
+                <!-- Customization Options Accordion/Card -->
+                <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700/60 p-6 shadow-sm space-y-6">
+                    <h3 class="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2 border-b border-slate-100 dark:border-slate-700/50 pb-3">
+                        <i class="fa-solid fa-sliders text-brand-500"></i> Kustomisasi Desain QR
+                    </h3>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <!-- Color Pickers -->
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">Warna Pola (Foreground)</label>
+                                <div class="flex items-center gap-3">
+                                    <input type="color" id="fgColor" value="#0f172a" class="w-10 h-10 rounded-xl cursor-pointer border-none bg-transparent">
+                                    <input type="text" id="fgColorHex" value="#0f172a" class="w-28 px-3 py-1.5 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg uppercase">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">Warna Latar (Background)</label>
+                                <div class="flex items-center gap-3">
+                                    <input type="color" id="bgColor" value="#ffffff" class="w-10 h-10 rounded-xl cursor-pointer border-none bg-transparent">
+                                    <input type="text" id="bgColorHex" value="#ffffff" class="w-28 px-3 py-1.5 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg uppercase">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Technical Settings -->
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex justify-between items-center mb-1">
+                                    <label class="text-xs font-semibold text-slate-500 dark:text-slate-400">Ukuran Gambar (PX)</label>
+                                    <span id="sizeValue" class="text-xs font-bold text-brand-600 dark:text-brand-400">300 x 300 px</span>
+                                </div>
+                                <input type="range" id="qrSize" min="150" max="600" step="10" value="300" class="w-full accent-brand-600 cursor-pointer">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Tingkat Koreksi Eror (ECC)</label>
+                                <select id="eccLevel" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 outline-none">
+                                    <option value="L">Rendah (L - 7%)</option>
+                                    <option value="M" selected>Sedang (M - 15%)</option>
+                                    <option value="Q">Tinggi (Q - 25%)</option>
+                                    <option value="H">Sangat Tinggi (H - 30% - Disarankan untuk Logo)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Logo Upload Section -->
+                    <div class="pt-2 border-t border-slate-100 dark:border-slate-700/50">
+                        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">Logo Tengah (Opsional)</label>
+                        <div class="flex items-center gap-4">
+                            <label class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-dashed border-slate-300 dark:border-slate-700 rounded-xl cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-sm text-slate-600 dark:text-slate-300">
+                                <i class="fa-solid fa-cloud-arrow-up text-brand-500"></i>
+                                <span id="logoFileName">Unggah Logo PNG / JPG</span>
+                                <input type="file" id="logoInput" accept="image/png, image/jpeg, image/svg+xml" class="hidden">
+                            </label>
+                            <button id="removeLogoBtn" class="hidden p-2.5 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-xl transition-colors" title="Hapus Logo">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- RIGHT PANEL: Live Preview & Export (5 Cols) -->
+            <div class="lg:col-span-5 space-y-6">
+                <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700/60 p-6 shadow-sm sticky top-24 flex flex-col items-center text-center">
+                    
+                    <h2 class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-6">Pratinjau QR Code</h2>
+
+                    <!-- Canvas/Preview Box -->
+                    <div class="relative group p-6 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 flex items-center justify-center shadow-inner min-h-[280px] min-w-[280px] w-full max-w-[340px] aspect-square overflow-hidden">
+                        
+                        <!-- Main Canvas rendered via Javascript -->
+                        <canvas id="qrCanvas" class="max-w-full max-h-full object-contain rounded-lg transition-transform duration-200 group-hover:scale-[1.02]"></canvas>
+
+                        <!-- Hidden elements for temporary processing -->
+                        <div id="qrcode-hidden" class="hidden"></div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="w-full mt-6 grid grid-cols-2 gap-3">
+                        <button id="downloadPngBtn" class="w-full py-3 px-4 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl shadow-md shadow-brand-500/20 active:scale-95 transition-all duration-150 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-download"></i> Unduh PNG
+                        </button>
+                        <button id="downloadSvgBtn" class="w-full py-3 px-4 bg-slate-800 hover:bg-slate-900 dark:bg-slate-700 dark:hover:bg-slate-600 text-white font-semibold rounded-xl active:scale-95 transition-all duration-150 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-file-code"></i> Unduh SVG
+                        </button>
+                    </div>
+
+                    <div class="w-full mt-3 grid grid-cols-2 gap-3">
+                        <button id="copyImgBtn" class="w-full py-2.5 px-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700/50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-sm font-medium rounded-xl active:scale-95 transition-all duration-150 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-copy"></i> Salin Gambar
+                        </button>
+                        <button id="copyLinkBtn" class="w-full py-2.5 px-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700/50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-sm font-medium rounded-xl active:scale-95 transition-all duration-150 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-link"></i> Salin Tautan
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <!-- History Section -->
+        <section class="mt-12 pt-8 border-t border-slate-200 dark:border-slate-800">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                        <i class="fa-solid fa-clock-rotate-left text-brand-500"></i> Riwayat Terakhir
+                    </h2>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">QR Code yang pernah Anda buat akan tersimpan di peramban ini</p>
+                </div>
+                <button id="clearHistoryBtn" class="text-xs text-rose-500 hover:text-rose-600 hover:underline flex items-center gap-1">
+                    <i class="fa-solid fa-trash"></i> Bersihkan Riwayat
+                </button>
+            </div>
+
+            <!-- History Cards Grid -->
+            <div id="historyGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <!-- Empty state placeholder (filled by JS) -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-auto py-6 border-t border-slate-200 dark:border-slate-800 text-center text-xs text-slate-400">
+        <p>© 2026 QR Studio - Aplikasi Pembuat Kode QR Modern & Cepat</p>
+    </footer>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-slate-900 text-white dark:bg-white dark:text-slate-900 px-5 py-3.5 rounded-2xl shadow-xl transition-all duration-300 transform translate-y-20 opacity-0 pointer-events-none">
+        <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 dark:text-emerald-600 text-lg"></i>
+        <span id="toastMsg" class="text-sm font-medium">Notifikasi</span>
+    </div>
+
+    <script>
+        // State variables
+        let currentType = 'url';
+        let logoImage = null;
+        let qrHistory = JSON.parse(localStorage.getItem('qr_studio_history') || '[]');
+
+        // DOM Element references
+        const canvas = document.getElementById('qrCanvas');
+        const ctx = canvas.getContext('2d');
+        const themeToggleBtn = document.getElementById('themeToggleBtn');
+        const logoInput = document.getElementById('logoInput');
+        const logoFileName = document.getElementById('logoFileName');
+        const removeLogoBtn = document.getElementById('removeLogoBtn');
+        const fgColorInput = document.getElementById('fgColor');
+        const fgColorHex = document.getElementById('fgColorHex');
+        const bgColorInput = document.getElementById('bgColor');
+        const bgColorHex = document.getElementById('bgColorHex');
+        const qrSizeInput = document.getElementById('qrSize');
+        const sizeValue = document.getElementById('sizeValue');
+        const eccLevelInput = document.getElementById('eccLevel');
+        
+        // Input fields
+        const urlInput = document.getElementById('urlInput');
+        const wifiSsid = document.getElementById('wifiSsid');
+        const wifiPass = document.getElementById('wifiPass');
+        const wifiEnc = document.getElementById('wifiEnc');
+        const wifiHidden = document.getElementById('wifiHidden');
+        const emailTo = document.getElementById('emailTo');
+        const emailSub = document.getElementById('emailSub');
+        const emailBody = document.getElementById('emailBody');
+        const textInput = document.getElementById('textInput');
+
+        // Initialize Theme Mode
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+
+        themeToggleBtn.addEventListener('click', () => {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+
+        // Toast Notification Helper
+        function showToast(message, isSuccess = true) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMsg');
+            const toastIcon = document.getElementById('toastIcon');
+
+            toastMsg.textContent = message;
+            toastIcon.className = isSuccess 
+                ? 'fa-solid fa-circle-check text-emerald-400 dark:text-emerald-600 text-lg' 
+                : 'fa-solid fa-circle-exclamation text-rose-400 dark:text-rose-600 text-lg';
+
+            toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+            }, 3000);
+        }
+
+        // Tab switching logic
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => {
+                    b.classList.remove('bg-brand-600', 'text-white', 'shadow-sm');
+                    b.classList.add('text-slate-600', 'dark:text-slate-300', 'hover:bg-slate-100', 'dark:hover:bg-slate-700/50');
+                });
+                btn.classList.add('bg-brand-600', 'text-white', 'shadow-sm');
+                btn.classList.remove('text-slate-600', 'dark:text-slate-300', 'hover:bg-slate-100', 'dark:hover:bg-slate-700/50');
+
+                currentType = btn.dataset.type;
+                document.querySelectorAll('.input-panel').forEach(p => p.classList.add('hidden'));
+                document.getElementById(`panel-${currentType}`).classList.remove('hidden');
+
+                generateQR();
+            });
+        });
+
+        // Color Inputs Synchronization
+        fgColorInput.addEventListener('input', (e) => {
+            fgColorHex.value = e.target.value;
+            generateQR();
+        });
+        fgColorHex.addEventListener('input', (e) => {
+            if (/^#[0-9A-F]{6}$/i.test(e.target.value)) {
+                fgColorInput.value = e.target.value;
+                generateQR();
+            }
+        });
+
+        bgColorInput.addEventListener('input', (e) => {
+            bgColorHex.value = e.target.value;
+            generateQR();
+        });
+        bgColorHex.addEventListener('input', (e) => {
+            if (/^#[0-9A-F]{6}$/i.test(e.target.value)) {
+                bgColorInput.value = e.target.value;
+                generateQR();
+            }
+        });
+
+        qrSizeInput.addEventListener('input', (e) => {
+            const val = e.target.value;
+            sizeValue.textContent = `${val} x ${val} px`;
+            generateQR();
+        });
+
+        eccLevelInput.addEventListener('change', generateQR);
+
+        // Logo Upload Handling
+        logoInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    const img = new Image();
+                    img.onload = function() {
+                        logoImage = img;
+                        logoFileName.textContent = file.name;
+                        removeLogoBtn.classList.remove('hidden');
+                        generateQR();
+                    }
+                    img.src = evt.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        removeLogoBtn.addEventListener('click', () => {
+            logoImage = null;
+            logoInput.value = '';
+            logoFileName.textContent = 'Unggah Logo PNG / JPG';
+            removeLogoBtn.classList.add('hidden');
+            generateQR();
+        });
+
+        // Listen for input changes to generate QR dynamically
+        [urlInput, wifiSsid, wifiPass, wifiEnc, wifiHidden, emailTo, emailSub, emailBody, textInput].forEach(elem => {
+            elem.addEventListener('input', generateQR);
+            elem.addEventListener('change', generateQR);
+        });
+
+        // Construct Payload String based on selected Tab
+        function getQRContent() {
+            switch (currentType) {
+                case 'url':
+                    return urlInput.value.trim() || 'https://example.com';
+                case 'wifi':
+                    const ssid = wifiSsid.value.trim() || 'MyWifi';
+                    const pass = wifiPass.value || '';
+                    const enc = wifiEnc.value;
+                    const hidden = wifiHidden.checked ? 'true' : 'false';
+                    return `WIFI:S:${ssid};T:${enc};P:${pass};H:${hidden};;`;
+                case 'email':
+                    const to = emailTo.value.trim();
+                    const sub = encodeURIComponent(emailSub.value.trim());
+                    const body = encodeURIComponent(emailBody.value.trim());
+                    return `mailto:${to}?subject=${sub}&body=${body}`;
+                case 'text':
+                    return textInput.value.trim() || 'Teks contoh QR Studio';
+                default:
+                    return 'https://example.com';
+            }
+        }
+
+        // Generate QR Code on Canvas
+        function generateQR() {
+            const text = getQRContent();
+            const size = parseInt(qrSizeInput.value, 10);
+            const fgColor = fgColorInput.value;
+            const bgColor = bgColorInput.value;
+            const eccLevel = eccLevelInput.value;
+
+            // Clear temporary div
+            const hiddenDiv = document.getElementById('qrcode-hidden');
+            hiddenDiv.innerHTML = '';
+
+            // Map ECC Level string to QRCode library format
+            let correctLevel = QRCode.CorrectLevel.M;
+            if (eccLevel === 'L') correctLevel = QRCode.CorrectLevel.L;
+            if (eccLevel === 'Q') correctLevel = QRCode.CorrectLevel.Q;
+            if (eccLevel === 'H') correctLevel = QRCode.CorrectLevel.H;
+
+            // Generate raw QR code HTML via library
+            try {
+                new QRCode(hiddenDiv, {
+                    text: text,
+                    width: size,
+                    height: size,
+                    colorDark: fgColor,
+                    colorLight: bgColor,
+                    correctLevel: correctLevel
+                });
+            } catch(e) {
+                // Return gracefully if text length exceeds capacity
+                return;
+            }
+
+            // Wait brief moment for library to complete canvas creation
+            setTimeout(() => {
+                const generatedCanvas = hiddenDiv.querySelector('canvas');
+                if (!generatedCanvas) return;
+
+                // Adjust Main Display Canvas Size
+                canvas.width = size;
+                canvas.height = size;
+
+                // Draw base QR code
+                ctx.clearRect(0, 0, size, size);
+                ctx.drawImage(generatedCanvas, 0, 0);
+
+                // Overlay Logo if exists
+                if (logoImage) {
+                    const logoSize = size * 0.22; // 22% of total QR size
+                    const logoX = (size - logoSize) / 2;
+                    const logoY = (size - logoSize) / 2;
+                    const padding = 6;
+
+                    // Draw solid background container behind logo for contrast
+                    ctx.fillStyle = bgColor;
+                    ctx.beginPath();
+                    ctx.roundRect(
+                        logoX - padding, 
+                        logoY - padding, 
+                        logoSize + (padding * 2), 
+                        logoSize + (padding * 2), 
+                        8
+                    );
+                    ctx.fill();
+
+                    // Draw Logo Image inside
+                    ctx.drawImage(logoImage, logoX, logoY, logoSize, logoSize);
+                }
+
+                // Debounce save history
+                saveToHistoryDebounced(text);
+            }, 50);
+        }
+
+        // Export PNG
+        document.getElementById('downloadPngBtn').addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.download = `QR-Studio-${Date.now()}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            showToast('QR Code berhasil diunduh sebagai PNG!');
+        });
+
+        // Export SVG
+        document.getElementById('downloadSvgBtn').addEventListener('click', () => {
+            const size = canvas.width;
+            const dataUrl = canvas.toDataURL('image/png');
+            
+            // Wrap Canvas image into an SVG container
+            const svgString = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+                    <image href="${dataUrl}" width="${size}" height="${size}" />
+                </svg>
+            `.trim();
+
+            const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.download = `QR-Studio-${Date.now()}.svg`;
+            link.href = url;
+            link.click();
+            URL.revokeObjectURL(url);
+            showToast('QR Code berhasil diunduh sebagai SVG!');
+        });
+
+        // Copy Image to Clipboard
+        document.getElementById('copyImgBtn').addEventListener('click', async () => {
+            try {
+                canvas.toBlob(async (blob) => {
+                    const item = new ClipboardItem({ 'image/png': blob });
+                    await navigator.clipboard.write([item]);
+                    showToast('Gambar QR berhasil disalin ke clipboard!');
+                });
+            } catch (err) {
+                showToast('Gagal menyalin gambar', false);
+            }
+        });
+
+        // Copy Link / Text
+        document.getElementById('copyLinkBtn').addEventListener('click', () => {
+            const content = getQRContent();
+            
+            // Fallback for document.execCommand('copy') as mandated
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = content;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempTextArea);
+
+            showToast('Tautan/Teks QR berhasil disalin!');
+        });
+
+        let historyTimeout = null;
+        function saveToHistoryDebounced(text) {
+            clearTimeout(historyTimeout);
+            historyTimeout = setTimeout(() => {
+                if (!text || text.trim() === '') return;
+                
+                const dataUrl = canvas.toDataURL('image/png');
+                const newItem = {
+                    id: Date.now(),
+                    type: currentType,
+                    content: text,
+                    image: dataUrl,
+                    date: new Date().toLocaleDateString('id-ID', { hour: '2-digit', minute: '2-digit' })
+                };
+
+                // Filter duplicates with same content
+                qrHistory = qrHistory.filter(item => item.content !== text);
+                qrHistory.unshift(newItem);
+                
+                // Keep max 8 items
+                if (qrHistory.length > 8) qrHistory.pop();
+
+                localStorage.setItem('qr_studio_history', JSON.stringify(qrHistory));
+                renderHistory();
+            }, 1000);
+        }
+
+        function renderHistory() {
+            const grid = document.getElementById('historyGrid');
+            if (qrHistory.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full py-8 text-center text-slate-400 bg-white dark:bg-slate-800/40 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
+                        <i class="fa-solid fa-folder-open text-2xl mb-2 block"></i>
+                        Belum ada riwayat QR Code
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = qrHistory.map(item => `
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700/60 shadow-sm flex items-center gap-3 group">
+                    <img src="${item.image}" alt="QR" class="w-14 h-14 bg-slate-50 rounded-lg border border-slate-100 dark:border-slate-700 object-contain">
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-1.5 mb-1">
+                            <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 dark:bg-brand-950/50 dark:text-brand-400">
+                                ${item.type}
+                            </span>
+                            <span class="text-[11px] text-slate-400">${item.date}</span>
+                        </div>
+                        <p class="text-xs font-medium text-slate-700 dark:text-slate-300 truncate" title="${item.content}">
+                            ${item.content}
+                        </p>
+                    </div>
+                    <button onclick="deleteHistoryItem(${item.id})" class="text-slate-300 hover:text-rose-500 dark:text-slate-600 dark:hover:text-rose-400 p-1.5 transition-colors" title="Hapus">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        window.deleteHistoryItem = function(id) {
+            qrHistory = qrHistory.filter(item => item.id !== id);
+            localStorage.setItem('qr_studio_history', JSON.stringify(qrHistory));
+            renderHistory();
+            showToast('Item riwayat telah dihapus');
+        };
+
+        document.getElementById('clearHistoryBtn').addEventListener('click', () => {
+            if (qrHistory.length === 0) return;
+            qrHistory = [];
+            localStorage.removeItem('qr_studio_history');
+            renderHistory();
+            showToast('Semua riwayat berhasil dibersihkan');
+        });
+
+        // Initialize App on window load
+        window.onload = function() {
+            urlInput.value = 'https://google.com';
+            generateQR();
+            renderHistory();
+        };
+    </script>
+</body>
+</html>
