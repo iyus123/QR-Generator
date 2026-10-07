@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generator QR Code Templat Ulasan Google</title>
+    <title>Google Review & Custom QR Code Poster Generator</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- QRCode.js Library -->
@@ -16,22 +16,11 @@
             font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: #0f172a;
             color: #f8fafc;
+            user-select: none;
         }
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #1e293b;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #475569;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #64748b;
-        }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -44,620 +33,178 @@
                     <i data-lucide="qr-code" class="w-6 h-6"></i>
                 </div>
                 <div>
-                    <h1 class="font-bold text-lg leading-none text-white">Google Review QR Studio</h1>
-                    <p class="text-xs text-slate-400 mt-1">Cetak Akrilik & Poster Ulasan Google</p>
+                    <h1 class="font-bold text-lg leading-none text-white">QR Poster Builder</h1>
+                    <p class="text-xs text-slate-400 mt-1">Upload Templat, Custom Logo & Interactive Drag-Resize QR</p>
                 </div>
             </div>
             <div class="flex items-center gap-2">
-                <button onclick="downloadPoster()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl font-medium text-sm flex items-center gap-2 transition shadow-lg shadow-blue-600/20 active:scale-95">
+                <button onclick="downloadPoster()" class="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 transition shadow-lg shadow-blue-600/30 active:scale-95">
                     <i data-lucide="download" class="w-4 h-4"></i>
-                    <span>Unduh PNG</span>
+                    <span>Unduh PNG High-Res</span>
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- Main Container -->
+    <!-- Main Workspace -->
     <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
         
-        <!-- Left Panel: Controls & Input -->
-        <div class="lg:col-span-5 space-y-6">
+        <!-- Left Sidebar: Controls -->
+        <div class="lg:col-span-4 space-y-6">
             
-            <!-- Step 1: Input URL -->
+            <!-- Step 1: Upload Template -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
+                <label class="block text-sm font-semibold text-slate-200 mb-3 flex items-center gap-2">
+                    <i data-lucide="image" class="w-4 h-4 text-blue-400"></i>
+                    1. Upload Gambar Templat Desain
+                </label>
+                <input type="file" id="templateUploader" accept="image/*" onchange="loadCustomTemplate(event)" class="hidden">
+                <button onclick="document.getElementById('templateUploader').click()" class="w-full py-4 border-2 border-dashed border-blue-500/40 hover:border-blue-400 bg-blue-500/5 rounded-xl text-sm font-medium text-slate-200 flex flex-col items-center justify-center gap-2 transition hover:bg-blue-500/10">
+                    <i data-lucide="upload-cloud" class="w-6 h-6 text-blue-400"></i>
+                    <span>Klik untuk Upload File Gambar Templat</span>
+                    <span class="text-xs text-slate-400 font-normal">Format PNG, JPG, WEBP (A5, 10x10 cm, dll)</span>
+                </button>
+                <p id="templateFileName" class="text-xs text-emerald-400 mt-2 font-medium hidden flex items-center gap-1">
+                    <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Templat berhasil dimuat
+                </p>
+            </div>
+
+            <!-- Step 2: Input URL / Link -->
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
                 <label class="block text-sm font-semibold text-slate-200 mb-2 flex items-center gap-2">
                     <i data-lucide="link" class="w-4 h-4 text-blue-400"></i>
-                    1. Tautan Ulasan Google / URL
+                    2. Tautan URL / Link
                 </label>
                 <div class="relative">
                     <input type="url" id="qrInput" 
                         value="https://g.page/r/c/review" 
                         placeholder="https://g.page/r/your-google-review-link"
                         class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition pr-10">
-                    <button onclick="document.getElementById('qrInput').value=''; renderCanvas();" class="absolute right-3 top-3 text-slate-500 hover:text-slate-300">
-                        <i data-lucide="x" class="w-4 h-4"></i>
-                    </button>
-                </div>
-                <p class="text-xs text-slate-400 mt-2">Dapatkan link ini dari Google Bisnisku > "Minta Ulasan".</p>
-            </div>
-
-            <!-- Step 2: Select Template -->
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
-                <label class="block text-sm font-semibold text-slate-200 mb-3 flex items-center gap-2">
-                    <i data-lucide="layout-template" class="w-4 h-4 text-blue-400"></i>
-                    2. Pilih Desain Templat
-                </label>
-                
-                <div class="grid grid-cols-2 gap-3">
-                    <!-- Template 1 -->
-                    <button onclick="selectTemplate('a5_bright')" id="btn_a5_bright" class="tpl-btn border-2 border-blue-500 bg-blue-500/10 p-3 rounded-xl flex flex-col items-center gap-2 text-left transition hover:border-blue-400">
-                        <div class="w-full aspect-[2/3] bg-slate-800 rounded-lg overflow-hidden border border-slate-700 relative">
-                            <div class="absolute inset-0 bg-white flex flex-col items-center justify-between p-2">
-                                <div class="w-3 h-3 rounded-full bg-red-500 mt-1"></div>
-                                <div class="w-full h-1/2 bg-blue-600 rounded-t-full mt-auto relative p-1">
-                                    <div class="w-full h-full bg-white rounded flex items-center justify-end p-1">
-                                        <div class="w-1/2 aspect-square bg-slate-900 rounded-sm"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <span class="text-xs font-medium text-slate-200 text-center">A5 Cerah</span>
-                    </button>
-
-                    <!-- Template 2 -->
-                    <button onclick="selectTemplate('a5_dark')" id="btn_a5_dark" class="tpl-btn border-2 border-slate-800 bg-slate-950 p-3 rounded-xl flex flex-col items-center gap-2 text-left transition hover:border-blue-400">
-                        <div class="w-full aspect-[2/3] bg-slate-800 rounded-lg overflow-hidden border border-slate-700 relative">
-                            <div class="absolute inset-0 bg-slate-950 flex flex-col items-center justify-between p-2">
-                                <div class="w-3 h-3 rounded-full bg-red-500 mt-1"></div>
-                                <div class="w-full h-1/2 bg-blue-600 rounded-t-full mt-auto relative p-1">
-                                    <div class="w-full h-full bg-slate-900 rounded flex items-center justify-end p-1">
-                                        <div class="w-1/2 aspect-square bg-slate-950 rounded-sm border border-slate-800"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <span class="text-xs font-medium text-slate-200 text-center">A5 Gelap</span>
-                    </button>
-
-                    <!-- Template 3 -->
-                    <button onclick="selectTemplate('sq_bright')" id="btn_sq_bright" class="tpl-btn border-2 border-slate-800 bg-slate-950 p-3 rounded-xl flex flex-col items-center gap-2 text-left transition hover:border-blue-400">
-                        <div class="w-full aspect-square bg-slate-800 rounded-lg overflow-hidden border border-slate-700 relative">
-                            <div class="absolute inset-0 bg-white flex flex-col justify-between">
-                                <div class="h-1/2 bg-blue-600"></div>
-                                <div class="p-2 flex justify-end">
-                                    <div class="w-1/2 aspect-square bg-slate-900 rounded-sm"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <span class="text-xs font-medium text-slate-200 text-center">10x10 Cerah</span>
-                    </button>
-
-                    <!-- Template 4 -->
-                    <button onclick="selectTemplate('sq_dark')" id="btn_sq_dark" class="tpl-btn border-2 border-slate-800 bg-slate-950 p-3 rounded-xl flex flex-col items-center gap-2 text-left transition hover:border-blue-400">
-                        <div class="w-full aspect-square bg-slate-800 rounded-lg overflow-hidden border border-slate-700 relative">
-                            <div class="absolute inset-0 bg-slate-950 flex flex-col justify-between">
-                                <div class="h-1/2 bg-slate-900 border-b border-blue-500"></div>
-                                <div class="p-2 flex justify-end">
-                                    <div class="w-1/2 aspect-square bg-slate-900 rounded-sm border border-slate-800"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <span class="text-xs font-medium text-slate-200 text-center">10x10 Gelap</span>
-                    </button>
                 </div>
             </div>
 
-            <!-- Step 3: QR Customization & Adjustment -->
+            <!-- Step 3: Custom Logo on QR Code -->
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
                 <label class="block text-sm font-semibold text-slate-200 flex items-center justify-between">
                     <span class="flex items-center gap-2">
-                        <i data-lucide="sliders" class="w-4 h-4 text-blue-400"></i>
-                        3. Kustomisasi & Kalibrasi QR
+                        <i data-lucide="shield-alert" class="w-4 h-4 text-blue-400"></i>
+                        3. Upload Custom Logo QR
                     </span>
                 </label>
+                
+                <input type="file" id="logoUploader" accept="image/*" onchange="loadCustomLogo(event)" class="hidden">
+                <div class="flex gap-2">
+                    <button onclick="document.getElementById('logoUploader').click()" class="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition border border-slate-700">
+                        <i data-lucide="upload" class="w-4 h-4"></i>
+                        Upload Logo Sendiri
+                    </button>
+                    <button onclick="removeLogo()" id="removeLogoBtn" class="py-2.5 px-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-xl text-xs font-semibold hidden transition border border-red-500/30">
+                        Hapus Logo
+                    </button>
+                </div>
+                <p id="logoFileName" class="text-xs text-slate-400 italic">Default: Logo Google "G"</p>
 
-                <div class="grid grid-cols-2 gap-4">
+                <!-- Color Options -->
+                <div class="grid grid-cols-2 gap-4 border-t border-slate-800 pt-3">
                     <div>
-                        <label class="text-xs text-slate-400 mb-1 block">Warna QR</label>
+                        <label class="text-xs text-slate-400 mb-1 block">Warna QR Code</label>
                         <input type="color" id="qrColor" value="#000000" onchange="renderCanvas()" class="w-full h-9 bg-slate-950 border border-slate-700 rounded-lg cursor-pointer p-1">
                     </div>
                     <div>
-                        <label class="text-xs text-slate-400 mb-1 block">Logo Google</label>
-                        <button id="toggleLogoBtn" onclick="toggleLogo()" class="w-full h-9 bg-blue-600 text-white rounded-lg text-xs font-medium flex items-center justify-center gap-1">
-                            <i data-lucide="check" class="w-3.5 h-3.5"></i>
-                            Tampilkan Logo
-                        </button>
+                        <label class="text-xs text-slate-400 mb-1 block">Background QR</label>
+                        <input type="color" id="qrBgColor" value="#ffffff" onchange="renderCanvas()" class="w-full h-9 bg-slate-950 border border-slate-700 rounded-lg cursor-pointer p-1">
                     </div>
-                </div>
-
-                <!-- Calibration Sliders -->
-                <div class="border-t border-slate-800 pt-3 space-y-3">
-                    <p class="text-xs font-medium text-slate-400">Presisi Posisi QR Code (Jika Perlu):</p>
-                    <div>
-                        <div class="flex justify-between text-xs text-slate-400 mb-1">
-                            <span>Ukuran QR (Scale)</span>
-                            <span id="valScale">100%</span>
-                        </div>
-                        <input type="range" id="scaleInput" min="50" max="150" value="100" oninput="renderCanvas()" class="w-full accent-blue-500">
-                    </div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <div class="flex justify-between text-xs text-slate-400 mb-1">
-                                <span>Posisi X</span>
-                                <span id="valX">0</span>
-                            </div>
-                            <input type="range" id="posXInput" min="-100" max="100" value="0" oninput="renderCanvas()" class="w-full accent-blue-500">
-                        </div>
-                        <div>
-                            <div class="flex justify-between text-xs text-slate-400 mb-1">
-                                <span>Posisi Y</span>
-                                <span id="valY">0</span>
-                            </div>
-                            <input type="range" id="posYInput" min="-100" max="100" value="0" oninput="renderCanvas()" class="w-full accent-blue-500">
-                        </div>
-                    </div>
-                    <button onclick="resetCalibration()" class="text-xs text-slate-400 hover:text-white underline">
-                        Reset Posisi ke Default
-                    </button>
                 </div>
             </div>
 
-            <!-- Custom Upload Option -->
-            <div class="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-4">
-                <label class="block text-xs font-medium text-slate-400 mb-2">Punya File High-Res Sendiri?</label>
-                <input type="file" id="customTemplateUpload" accept="image/*" onchange="handleCustomUpload(event)" class="hidden">
-                <button onclick="document.getElementById('customTemplateUpload').click()" class="w-full py-2 border border-dashed border-slate-700 hover:border-slate-500 rounded-xl text-xs text-slate-300 flex items-center justify-center gap-2 transition">
-                    <i data-lucide="upload" class="w-4 h-4"></i>
-                    Unggah Gambar Templat Asli (.PNG / .JPG)
-                </button>
+            <!-- Interactive Guidance -->
+            <div class="bg-blue-950/40 border border-blue-800/50 rounded-2xl p-4 text-xs text-blue-200 space-y-1">
+                <p class="font-semibold flex items-center gap-1.5 text-blue-300">
+                    <i data-lucide="mouse-pointer" class="w-4 h-4"></i> Cara Mengatur Posisi QR Code:
+                </p>
+                <ul class="list-disc list-inside space-y-1 text-slate-300 pl-1">
+                    <li><strong class="text-white">Geser (Drag):</strong> Klik & tahan di tengah QR Code untuk memindahkan posisi.</li>
+                    <li><strong class="text-white">Ubah Ukuran (Resize):</strong> Klik & tahan bulatan di pojok kanan bawah QR Code.</li>
+                </ul>
             </div>
 
         </div>
 
-        <!-- Right Panel: Live Canvas Preview -->
-        <div class="lg:col-span-7 flex flex-col items-center justify-start space-y-4">
-            
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 w-full flex flex-col items-center justify-center shadow-2xl relative min-h-[500px]">
+        <!-- Right Preview Canvas -->
+        <div class="lg:col-span-8 flex flex-col items-center justify-start space-y-4">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 w-full flex flex-col items-center justify-center shadow-2xl relative min-h-[550px] overflow-hidden">
                 
-                <div class="absolute top-4 left-4 flex items-center gap-2 bg-slate-950/80 px-3 py-1.5 rounded-full border border-slate-800">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span class="text-xs text-slate-300 font-medium" id="currentTemplateLabel">A5 Cerah</span>
+                <div class="absolute top-4 left-4 flex items-center gap-2 bg-slate-950/80 px-3 py-1.5 rounded-full border border-slate-800 z-10">
+                    <i data-lucide="move" class="w-3.5 h-3.5 text-blue-400"></i>
+                    <span class="text-xs text-slate-300 font-medium">Interactive Canvas Mode</span>
                 </div>
 
-                <!-- Canvas Preview Container -->
-                <div class="relative max-w-full overflow-hidden flex items-center justify-center my-4">
-                    <canvas id="posterCanvas" class="max-h-[65vh] w-auto h-auto rounded-lg shadow-2xl border border-slate-800"></canvas>
+                <!-- Canvas Preview -->
+                <div class="relative max-w-full overflow-auto flex items-center justify-center p-2">
+                    <canvas id="posterCanvas" class="max-h-[70vh] w-auto h-auto rounded-lg shadow-2xl cursor-grab border border-slate-800"></canvas>
                 </div>
 
-                <p class="text-xs text-slate-500">Pratinjau langsung sesuai dengan hasil unduhan PNG akhir.</p>
             </div>
 
-            <!-- Quick Action Buttons -->
             <div class="w-full grid grid-cols-2 gap-4">
                 <button onclick="downloadPoster()" class="bg-blue-600 hover:bg-blue-500 text-white font-medium py-3 rounded-xl flex items-center justify-center gap-2 transition shadow-lg shadow-blue-600/20 active:scale-95">
                     <i data-lucide="download" class="w-4 h-4"></i>
-                    Unduh Gambar (PNG)
+                    Unduh PNG High-Res
                 </button>
                 <button onclick="window.print()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium py-3 rounded-xl flex items-center justify-center gap-2 transition border border-slate-700 active:scale-95">
                     <i data-lucide="printer" class="w-4 h-4"></i>
-                    Cetak Direct / PDF
+                    Cetak / Simpan PDF
                 </button>
             </div>
-
         </div>
 
     </main>
 
-    <!-- Hidden Temporary Container for QR Code generation -->
+    <!-- Hidden QRCode container -->
     <div id="qrcode-hidden" class="hidden"></div>
 
-    <!-- Application Script -->
     <script>
-        // Init Lucide Icons
         lucide.createIcons();
 
-        // State Management
-        let currentTemplate = 'a5_bright';
-        let showGoogleLogo = true;
-        let customImageLoaded = null;
+        // Canvas & Interactive State
+        let templateImage = null;
+        let customLogoImage = null;
+        let isDefaultLogo = true;
 
-        // Base Configuration for Templates and QR Code Coordinates
-        const templates = {
-            a5_bright: {
-                name: "A5 Cerah",
-                aspect: 2/3,
-                qrBox: { x: 535, y: 685, w: 320, h: 320 }, // Exact bounding box relative to template resolution
-                drawBase: function(ctx, width, height) {
-                    // Draw White Background
-                    ctx.fillStyle = '#ffffff';
-                    ctx.fillRect(0, 0, width, height);
+        // Interactive QR Code Position & Bounds
+        let qrBox = { x: 300, y: 300, w: 200, h: 200 };
+        let isDragging = false;
+        let isResizing = false;
+        let dragOffsetX = 0;
+        let dragOffsetY = 0;
+        const handleSize = 16; // Resize handle size
 
-                    // Top Google Pin Icon
-                    drawGooglePin(ctx, width / 2, height * 0.1, 40);
+        const canvas = document.getElementById('posterCanvas');
+        const ctx = canvas.getContext('2d');
 
-                    // Title Text
-                    ctx.fillStyle = '#0f172a';
-                    ctx.font = 'bold 52px "Plus Jakarta Sans", sans-serif';
-                    ctx.textAlign = 'center';
-                    ctx.fillText('Bantu kami dengan', width / 2, height * 0.22);
+        // Load Default Google Logo
+        const defaultLogo = new Image();
+        defaultLogo.crossOrigin = "anonymous";
+        defaultLogo.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="%234285F4" d="M386 400c45-42 65-104 53-168H260v90h102c-10 40-37 72-72 90v48h68c40-37 64-92 64-160z"/><path fill="%2334A853" d="M260 496c65 0 120-22 160-60l-68-48c-22 15-51 24-92 24-72 0-133-48-155-114H35v52c40 80 123 146 225 146z"/><path fill="%23FBBC05" d="M105 298c-6-18-9-37-9-58s3-40 9-58v-52H35C13 172 0 213 0 260s13 88 35 130l70-52z"/><path fill="%23EA4335" d="M260 100c36 0 68 13 93 37l68-68C380 32 325 8 260 8 158 8 75 74 35 154l70 52c22-66 83-106 155-106z"/></svg>';
+        defaultLogo.onload = () => { if (isDefaultLogo) customLogoImage = defaultLogo; };
 
-                    ctx.fillStyle = '#1d4ed8';
-                    ctx.fillText('ulasan Anda', width / 2, height * 0.28);
-
-                    // 5 Stars
-                    drawStars(ctx, width / 2, height * 0.34, 30);
-
-                    // Center Google "G" Badge
-                    drawGoogleBadge(ctx, width / 2, height * 0.5, 120);
-
-                    // Blue Bottom Wave Arc
-                    ctx.fillStyle = '#1d4ed8';
-                    ctx.beginPath();
-                    ctx.moveTo(0, height * 0.68);
-                    ctx.quadraticCurveTo(width / 2, height * 0.52, width, height * 0.68);
-                    ctx.lineTo(width, height);
-                    ctx.lineTo(0, height);
-                    ctx.closePath();
-                    ctx.fill();
-
-                    // White Card Container for NFC & QR
-                    const cardX = width * 0.1;
-                    const cardY = height * 0.65;
-                    const cardW = width * 0.8;
-                    const cardH = height * 0.27;
-                    
-                    ctx.fillStyle = '#ffffff';
-                    drawRoundedRect(ctx, cardX, cardY, cardW, cardH, 28);
-                    ctx.fill();
-
-                    // Left NFC Illustration Text
-                    ctx.fillStyle = '#0f172a';
-                    ctx.font = 'bold 30px "Plus Jakarta Sans", sans-serif';
-                    ctx.textAlign = 'center';
-                    ctx.fillText('Tap atau Scan', cardX + cardW * 0.25, cardY + cardH * 0.82);
-
-                    drawPhoneNFC(ctx, cardX + cardW * 0.25, cardY + cardH * 0.42, 60, false);
-
-                    // Divider Line
-                    ctx.strokeStyle = '#e2e8f0';
-                    ctx.lineWidth = 3;
-                    ctx.beginPath();
-                    ctx.moveTo(cardX + cardW * 0.48, cardY + cardH * 0.15);
-                    ctx.lineTo(cardX + cardW * 0.48, cardY + cardH * 0.85);
-                    ctx.stroke();
-
-                    // QR Slot Border Box
-                    ctx.strokeStyle = '#1d4ed8';
-                    ctx.lineWidth = 5;
-                    drawRoundedRect(ctx, 525, 675, 340, 340, 24);
-                    ctx.stroke();
-                }
-            },
-            a5_dark: {
-                name: "A5 Gelap",
-                aspect: 2/3,
-                qrBox: { x: 535, y: 685, w: 320, h: 320 },
-                drawBase: function(ctx, width, height) {
-                    // Dark Background
-                    ctx.fillStyle = '#090d16';
-                    ctx.fillRect(0, 0, width, height);
-
-                    // Top Google Pin Icon
-                    drawGooglePin(ctx, width / 2, height * 0.1, 40);
-
-                    // Title Text
-                    ctx.fillStyle = '#ffffff';
-                    ctx.font = 'bold 52px "Plus Jakarta Sans", sans-serif';
-                    ctx.textAlign = 'center';
-                    ctx.fillText('Bantu kami dengan', width / 2, height * 0.22);
-
-                    ctx.fillStyle = '#3b82f6';
-                    ctx.fillText('ulasan Anda', width / 2, height * 0.28);
-
-                    // 5 Stars
-                    drawStars(ctx, width / 2, height * 0.34, 30);
-
-                    // Center Google "G" Badge
-                    drawGoogleBadge(ctx, width / 2, height * 0.5, 120);
-
-                    // Blue Bottom Wave Arc
-                    ctx.fillStyle = '#1e40af';
-                    ctx.beginPath();
-                    ctx.moveTo(0, height * 0.68);
-                    ctx.quadraticCurveTo(width / 2, height * 0.52, width, height * 0.68);
-                    ctx.lineTo(width, height);
-                    ctx.lineTo(0, height);
-                    ctx.closePath();
-                    ctx.fill();
-
-                    // Dark Card Container for NFC & QR
-                    const cardX = width * 0.1;
-                    const cardY = height * 0.65;
-                    const cardW = width * 0.8;
-                    const cardH = height * 0.27;
-                    
-                    ctx.fillStyle = '#0f172a';
-                    drawRoundedRect(ctx, cardX, cardY, cardW, cardH, 28);
-                    ctx.fill();
-
-                    // Left NFC Text
-                    ctx.fillStyle = '#ffffff';
-                    ctx.font = 'bold 30px "Plus Jakarta Sans", sans-serif';
-                    ctx.textAlign = 'center';
-                    ctx.fillText('Tap atau Scan', cardX + cardW * 0.25, cardY + cardH * 0.82);
-
-                    drawPhoneNFC(ctx, cardX + cardW * 0.25, cardY + cardH * 0.42, 60, true);
-
-                    // Divider Line
-                    ctx.strokeStyle = '#1e293b';
-                    ctx.lineWidth = 3;
-                    ctx.beginPath();
-                    ctx.moveTo(cardX + cardW * 0.48, cardY + cardH * 0.15);
-                    ctx.lineTo(cardX + cardW * 0.48, cardY + cardH * 0.85);
-                    ctx.stroke();
-
-                    // QR Slot Border Box
-                    ctx.strokeStyle = '#2563eb';
-                    ctx.lineWidth = 5;
-                    drawRoundedRect(ctx, 525, 675, 340, 340, 24);
-                    ctx.stroke();
-                }
-            },
-            sq_bright: {
-                name: "10x10 cm Cerah",
-                aspect: 1,
-                qrBox: { x: 610, y: 560, w: 320, h: 320 },
-                drawBase: function(ctx, width, height) {
-                    ctx.fillStyle = '#ffffff';
-                    ctx.fillRect(0, 0, width, height);
-
-                    // Blue Upper Arc
-                    ctx.fillStyle = '#1d4ed8';
-                    ctx.beginPath();
-                    ctx.moveTo(0, 0);
-                    ctx.lineTo(width, 0);
-                    ctx.lineTo(width, height * 0.48);
-                    ctx.quadraticCurveTo(width / 2, height * 0.54, 0, height * 0.42);
-                    ctx.closePath();
-                    ctx.fill();
-
-                    // Google "G" Badge Top Left
-                    drawGoogleBadge(ctx, width * 0.24, height * 0.23, 110);
-
-                    // "review us on Google" Text
-                    ctx.fillStyle = '#ffffff';
-                    ctx.font = 'bold 48px "Plus Jakarta Sans", sans-serif';
-                    ctx.textAlign = 'left';
-                    ctx.fillText('review us', width * 0.48, height * 0.18);
-                    ctx.font = 'bold 58px "Plus Jakarta Sans", sans-serif';
-                    ctx.fillText('on Google', width * 0.43, height * 0.28);
-
-                    // Stars
-                    drawStars(ctx, width * 0.65, height * 0.36, 26);
-
-                    // Bottom Section
-                    ctx.fillStyle = '#0f172a';
-                    ctx.font = 'bold 36px "Plus Jakarta Sans", sans-serif';
-                    ctx.textAlign = 'center';
-                    ctx.fillText('Tap your phone', width * 0.28, height * 0.56);
-
-                    drawPhoneNFC(ctx, width * 0.28, height * 0.74, 70, false);
-
-                    ctx.fillStyle = '#0f172a';
-                    ctx.font = 'bold 36px "Plus Jakarta Sans", sans-serif';
-                    ctx.fillText('or', width * 0.53, height * 0.73);
-
-                    // QR Slot Box Frame
-                    ctx.strokeStyle = '#0f172a';
-                    ctx.lineWidth = 5;
-                    drawRoundedRect(ctx, 600, 550, 340, 340, 24);
-                    ctx.stroke();
-                }
-            },
-            sq_dark: {
-                name: "10x10 cm Gelap",
-                aspect: 1,
-                qrBox: { x: 610, y: 560, w: 320, h: 320 },
-                drawBase: function(ctx, width, height) {
-                    ctx.fillStyle = '#070b12';
-                    ctx.fillRect(0, 0, width, height);
-
-                    // Upper Blue Divider Arc Line
-                    ctx.strokeStyle = '#2563eb';
-                    ctx.lineWidth = 4;
-                    ctx.beginPath();
-                    ctx.moveTo(0, height * 0.5);
-                    ctx.quadraticCurveTo(width / 2, height * 0.42, width, height * 0.5);
-                    ctx.stroke();
-
-                    // Google Badge
-                    drawGoogleBadge(ctx, width * 0.24, height * 0.23, 110);
-
-                    // Text
-                    ctx.fillStyle = '#ffffff';
-                    ctx.font = 'bold 48px "Plus Jakarta Sans", sans-serif';
-                    ctx.textAlign = 'left';
-                    ctx.fillText('review us', width * 0.48, height * 0.18);
-                    ctx.font = 'bold 58px "Plus Jakarta Sans", sans-serif';
-                    ctx.fillText('on Google', width * 0.43, height * 0.28);
-
-                    // Stars
-                    drawStars(ctx, width * 0.65, height * 0.36, 26);
-
-                    // Bottom Text & Phone Icon
-                    ctx.fillStyle = '#ffffff';
-                    ctx.font = 'bold 36px "Plus Jakarta Sans", sans-serif';
-                    ctx.textAlign = 'center';
-                    ctx.fillText('Tap your phone', width * 0.28, height * 0.56);
-
-                    drawPhoneNFC(ctx, width * 0.28, height * 0.74, 70, true);
-
-                    ctx.fillStyle = '#ffffff';
-                    ctx.font = 'bold 36px "Plus Jakarta Sans", sans-serif';
-                    ctx.fillText('or', width * 0.53, height * 0.73);
-
-                    // QR Slot Frame Box
-                    ctx.strokeStyle = '#38bdf8';
-                    ctx.lineWidth = 4;
-                    drawRoundedRect(ctx, 600, 550, 340, 340, 24);
-                    ctx.stroke();
-                }
-            }
-        };
-
-        // Helper Drawing Functions
-        function drawRoundedRect(ctx, x, y, width, height, radius) {
-            ctx.beginPath();
-            ctx.moveTo(x + radius, y);
-            ctx.lineTo(x + width - radius, y);
-            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-            ctx.lineTo(x + width, y + height - radius);
-            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-            ctx.lineTo(x + radius, y + height);
-            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-            ctx.lineTo(x, y + radius);
-            ctx.quadraticCurveTo(x, y, x + radius, y);
-            ctx.closePath();
-        }
-
-        function drawStars(ctx, cx, cy, size) {
-            const gap = size * 1.5;
-            const startX = cx - (gap * 2);
-            for (let i = 0; i < 5; i++) {
-                drawSingleStar(ctx, startX + (i * gap), cy, size, '#fbbf24');
-            }
-        }
-
-        function drawSingleStar(ctx, cx, cy, r, color) {
-            ctx.save();
-            ctx.fillStyle = color;
-            ctx.beginPath();
-            for (let i = 0; i < 5; i++) {
-                ctx.lineTo(Math.cos((18 + i * 72) * Math.PI / 180) * r + cx, -Math.sin((18 + i * 72) * Math.PI / 180) * r + cy);
-                ctx.lineTo(Math.cos((54 + i * 72) * Math.PI / 180) * (r/2) + cx, -Math.sin((54 + i * 72) * Math.PI / 180) * (r/2) + cy);
-            }
-            ctx.closePath();
-            ctx.fill();
-            ctx.restore();
-        }
-
-        function drawGooglePin(ctx, x, y, size) {
-            ctx.save();
-            ctx.translate(x, y);
-            // Red Top
-            ctx.fillStyle = '#ea4335';
-            ctx.beginPath(); ctx.arc(0, 0, size, Math.PI, 0); ctx.fill();
-            // Yellow Left
-            ctx.fillStyle = '#fbbc05';
-            ctx.beginPath(); ctx.arc(0, 0, size, Math.PI * 0.7, Math.PI); ctx.fill();
-            // Blue Right
-            ctx.fillStyle = '#4285f4';
-            ctx.beginPath(); ctx.arc(0, 0, size, 0, Math.PI * 0.3); ctx.fill();
-            // Green Bottom
-            ctx.fillStyle = '#34a853';
-            ctx.beginPath(); ctx.moveTo(-size, 0); ctx.lineTo(0, size * 1.8); ctx.lineTo(size, 0); ctx.fill();
-            // White Inner Circle
-            ctx.fillStyle = '#ffffff';
-            ctx.beginPath(); ctx.arc(0, -size*0.1, size*0.45, 0, Math.PI*2); ctx.fill();
-            ctx.restore();
-        }
-
-        function drawGoogleBadge(ctx, x, y, size) {
-            ctx.save();
-            // Outer Shadow Circle
-            ctx.shadowColor = 'rgba(0,0,0,0.2)';
-            ctx.shadowBlur = 20;
-            ctx.fillStyle = '#ffffff';
-            ctx.beginPath();
-            ctx.arc(x, y, size / 2, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.shadowColor = 'transparent';
-
-            // Google "G" Logo
-            const r = size * 0.3;
-            // Blue
-            ctx.fillStyle = '#4285f4';
-            ctx.beginPath(); ctx.arc(x, y, r, -Math.PI*0.25, Math.PI*0.25); ctx.lineTo(x, y); ctx.fill();
-            // Green
-            ctx.fillStyle = '#34a853';
-            ctx.beginPath(); ctx.arc(x, y, r, Math.PI*0.25, Math.PI*0.75); ctx.lineTo(x, y); ctx.fill();
-            // Yellow
-            ctx.fillStyle = '#fbbc05';
-            ctx.beginPath(); ctx.arc(x, y, r, Math.PI*0.75, Math.PI*1.25); ctx.lineTo(x, y); ctx.fill();
-            // Red
-            ctx.fillStyle = '#ea4335';
-            ctx.beginPath(); ctx.arc(x, y, r, Math.PI*1.25, Math.PI*1.75); ctx.lineTo(x, y); ctx.fill();
-            // White Center
-            ctx.fillStyle = '#ffffff';
-            ctx.beginPath(); ctx.arc(x, y, r * 0.55, 0, Math.PI * 2); ctx.fill();
-            // Horizontal Bar
-            ctx.fillStyle = '#4285f4';
-            ctx.fillRect(x, y - r * 0.2, r * 0.9, r * 0.4);
-
-            ctx.restore();
-        }
-
-        function drawPhoneNFC(ctx, x, y, size, isDark) {
-            ctx.save();
-            ctx.strokeStyle = isDark ? '#ffffff' : '#1d4ed8';
-            ctx.lineWidth = 4;
-            // Phone Body
-            drawRoundedRect(ctx, x - size*0.3, y - size*0.5, size*0.6, size, 10);
-            ctx.stroke();
-            // NFC Waves
-            ctx.beginPath();
-            ctx.arc(x + size*0.5, y, size*0.3, -Math.PI*0.4, Math.PI*0.4); ctx.stroke();
-            ctx.beginPath();
-            ctx.arc(x + size*0.5, y, size*0.5, -Math.PI*0.4, Math.PI*0.4); ctx.stroke();
-            ctx.restore();
-        }
-
-        // Selection Handlers
-        function selectTemplate(tplKey) {
-            currentTemplate = tplKey;
-            customImageLoaded = null;
-            document.querySelectorAll('.tpl-btn').forEach(btn => {
-                btn.classList.remove('border-blue-500', 'bg-blue-500/10');
-                btn.classList.add('border-slate-800', 'bg-slate-950');
-            });
-            const activeBtn = document.getElementById(`btn_${tplKey}`);
-            if (activeBtn) {
-                activeBtn.classList.remove('border-slate-800', 'bg-slate-950');
-                activeBtn.classList.add('border-blue-500', 'bg-blue-500/10');
-            }
-            document.getElementById('currentTemplateLabel').innerText = templates[tplKey].name;
-            renderCanvas();
-        }
-
-        function toggleLogo() {
-            showGoogleLogo = !showGoogleLogo;
-            const btn = document.getElementById('toggleLogoBtn');
-            if (showGoogleLogo) {
-                btn.className = 'w-full h-9 bg-blue-600 text-white rounded-lg text-xs font-medium flex items-center justify-center gap-1';
-                btn.innerHTML = '<i data-lucide="check" class="w-3.5 h-3.5"></i> Tampilkan Logo';
-            } else {
-                btn.className = 'w-full h-9 bg-slate-800 text-slate-400 rounded-lg text-xs font-medium flex items-center justify-center gap-1 border border-slate-700';
-                btn.innerHTML = 'Sembunyikan Logo';
-            }
-            lucide.createIcons();
-            renderCanvas();
-        }
-
-        function resetCalibration() {
-            document.getElementById('scaleInput').value = 100;
-            document.getElementById('posXInput').value = 0;
-            document.getElementById('posYInput').value = 0;
-            renderCanvas();
-        }
-
-        function handleCustomUpload(e) {
+        // 1. Template Upload Handler
+        function loadCustomTemplate(e) {
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(event) {
                     const img = new Image();
                     img.onload = function() {
-                        customImageLoaded = img;
+                        templateImage = img;
+                        // Center QR box inside new template
+                        qrBox.w = Math.min(img.width, img.height) * 0.3;
+                        qrBox.h = qrBox.w;
+                        qrBox.x = (img.width - qrBox.w) / 2;
+                        qrBox.y = (img.height - qrBox.h) / 2;
+
+                        document.getElementById('templateFileName').innerText = `Templat: ${file.name}`;
+                        document.getElementById('templateFileName').classList.remove('hidden');
                         renderCanvas();
                     }
                     img.src = event.target.result;
@@ -666,92 +213,248 @@
             }
         }
 
-        // Main Render Loop
+        // 2. Custom Logo Handler
+        function loadCustomLogo(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = new Image();
+                    img.onload = function() {
+                        customLogoImage = img;
+                        isDefaultLogo = false;
+                        document.getElementById('logoFileName').innerText = `Logo: ${file.name}`;
+                        document.getElementById('removeLogoBtn').classList.remove('hidden');
+                        renderCanvas();
+                    }
+                    img.src = event.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function removeLogo() {
+            customLogoImage = null;
+            isDefaultLogo = false;
+            document.getElementById('logoFileName').innerText = "Tanpa Logo";
+            document.getElementById('removeLogoBtn').classList.add('hidden');
+            renderCanvas();
+        }
+
+        // 3. Render Engine
         function renderCanvas() {
-            const canvas = document.getElementById('posterCanvas');
-            const ctx = canvas.getContext('2d');
             const urlText = document.getElementById('qrInput').value.trim() || 'https://g.page/r/c/review';
 
-            // High Resolution Poster Dimensions (300 DPI ready)
-            const canvasWidth = 1000;
-            const tplConfig = templates[currentTemplate];
-            const canvasHeight = canvasWidth / tplConfig.aspect;
-
-            canvas.width = canvasWidth;
-            canvas.height = canvasHeight;
-
-            // 1. Draw Template Background
-            if (customImageLoaded) {
-                ctx.drawImage(customImageLoaded, 0, 0, canvasWidth, canvasHeight);
+            // Dimensions setup
+            if (templateImage) {
+                canvas.width = templateImage.width;
+                canvas.height = templateImage.height;
             } else {
-                tplConfig.drawBase(ctx, canvasWidth, canvasHeight);
+                canvas.width = 800;
+                canvas.height = 1000;
             }
 
-            // 2. Generate Hidden QR Code Image
+            // Draw Background Template
+            if (templateImage) {
+                ctx.drawImage(templateImage, 0, 0, canvas.width, canvas.height);
+            } else {
+                // Placeholder if no template uploaded yet
+                ctx.fillStyle = '#1e293b';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#64748b';
+                ctx.font = 'bold 28px "Plus Jakarta Sans", sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('Silakan Upload Gambar Templat Desain Anda (Langkah 1)', canvas.width / 2, canvas.height / 2);
+            }
+
+            // Generate Hidden QR
             const hiddenQrDiv = document.getElementById('qrcode-hidden');
             hiddenQrDiv.innerHTML = '';
 
             const qrColor = document.getElementById('qrColor').value;
+            const qrBgColor = document.getElementById('qrBgColor').value;
 
             new QRCode(hiddenQrDiv, {
                 text: urlText,
-                width: 400,
-                height: 400,
+                width: 500,
+                height: 500,
                 colorDark: qrColor,
-                colorLight: "#ffffff",
+                colorLight: qrBgColor,
                 correctLevel: QRCode.CorrectLevel.H
             });
 
-            // Wait brief moment for QRCode DOM render
             setTimeout(() => {
                 const qrImg = hiddenQrDiv.querySelector('img');
                 if (qrImg && qrImg.src) {
                     const qrImageObj = new Image();
                     qrImageObj.onload = function() {
-                        
-                        // Calibration Readings
-                        const scale = parseInt(document.getElementById('scaleInput').value) / 100;
-                        const offsetX = parseInt(document.getElementById('posXInput').value);
-                        const offsetY = parseInt(document.getElementById('posYInput').value);
+                        // Draw QR Code Image
+                        ctx.drawImage(qrImageObj, qrBox.x, qrBox.y, qrBox.w, qrBox.h);
 
-                        document.getElementById('valScale').innerText = `${Math.round(scale * 100)}%`;
-                        document.getElementById('valX').innerText = offsetX;
-                        document.getElementById('valY').innerText = offsetY;
+                        // Draw Custom Logo in Center
+                        if (customLogoImage) {
+                            const logoSize = qrBox.w * 0.22;
+                            const logoX = qrBox.x + (qrBox.w - logoSize) / 2;
+                            const logoY = qrBox.y + (qrBox.h - logoSize) / 2;
 
-                        // Calculate Position inside Template Box Slot
-                        const box = tplConfig.qrBox;
-                        const qrWidth = box.w * scale;
-                        const qrHeight = box.h * scale;
-                        const qrX = box.x + (box.w - qrWidth) / 2 + offsetX;
-                        const qrY = box.y + (box.h - qrHeight) / 2 + offsetY;
+                            // White background circle for logo
+                            ctx.fillStyle = '#ffffff';
+                            ctx.beginPath();
+                            ctx.arc(logoX + logoSize/2, logoY + logoSize/2, logoSize/1.8, 0, Math.PI * 2);
+                            ctx.fill();
 
-                        // Draw QR Code
-                        ctx.drawImage(qrImageObj, qrX, qrY, qrWidth, qrHeight);
-
-                        // 3. Draw Optional Center Google Badge
-                        if (showGoogleLogo) {
-                            drawGoogleBadge(ctx, qrX + qrWidth/2, qrY + qrHeight/2, qrWidth * 0.22);
+                            ctx.drawImage(customLogoImage, logoX, logoY, logoSize, logoSize);
                         }
+
+                        // Draw Interactive Border Selection Overlay
+                        drawInteractiveControls();
                     };
                     qrImageObj.src = qrImg.src;
                 }
             }, 50);
         }
 
-        function downloadPoster() {
-            const canvas = document.getElementById('posterCanvas');
-            const link = document.createElement('a');
-            link.download = `Google-Review-Poster-${currentTemplate}.png`;
-            link.href = canvas.toDataURL('image/png', 1.0);
-            link.click();
+        // Draw Interactive Selection Controls (Border + Handle)
+        function drawInteractiveControls() {
+            ctx.save();
+            // Selection Dashed Border
+            ctx.strokeStyle = '#3b82f6';
+            ctx.lineWidth = 3;
+            ctx.setLineDash([8, 6]);
+            ctx.strokeRect(qrBox.x, qrBox.y, qrBox.w, qrBox.h);
+
+            // Corner Resize Handle (Bottom Right)
+            ctx.setLineDash([]);
+            ctx.fillStyle = '#3b82f6';
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(qrBox.x + qrBox.w, qrBox.y + qrBox.h, handleSize / 1.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.restore();
         }
 
-        // Initial Exec
+        // Pointer / Mouse Coordinates Helper
+        function getCanvasCoordinates(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+            return {
+                x: (clientX - rect.left) * scaleX,
+                y: (clientY - rect.top) * scaleY
+            };
+        }
+
+        // Mouse & Touch Event Listeners for Drag & Resize
+        function handlePointerDown(e) {
+            const pos = getCanvasCoordinates(e);
+
+            // Check if clicking on bottom-right resize handle
+            const handleX = qrBox.x + qrBox.w;
+            const handleY = qrBox.y + qrBox.h;
+            const distToHandle = Math.hypot(pos.x - handleX, pos.y - handleY);
+
+            if (distToHandle <= handleSize * 2) {
+                isResizing = true;
+            } else if (pos.x >= qrBox.x && pos.x <= qrBox.x + qrBox.w && pos.y >= qrBox.y && pos.y <= qrBox.y + qrBox.h) {
+                isDragging = true;
+                dragOffsetX = pos.x - qrBox.x;
+                dragOffsetY = pos.y - qrBox.y;
+                canvas.style.cursor = 'grabbing';
+            }
+        }
+
+        function handlePointerMove(e) {
+            const pos = getCanvasCoordinates(e);
+
+            if (isResizing) {
+                const newWidth = Math.max(80, pos.x - qrBox.x);
+                qrBox.w = newWidth;
+                qrBox.h = newWidth; // Keep square aspect ratio
+                renderCanvas();
+            } else if (isDragging) {
+                qrBox.x = pos.x - dragOffsetX;
+                qrBox.y = pos.y - dragOffsetY;
+                renderCanvas();
+            } else {
+                // Update cursor on hover
+                const handleX = qrBox.x + qrBox.w;
+                const handleY = qrBox.y + qrBox.h;
+                const distToHandle = Math.hypot(pos.x - handleX, pos.y - handleY);
+
+                if (distToHandle <= handleSize * 2) {
+                    canvas.style.cursor = 'nwse-resize';
+                } else if (pos.x >= qrBox.x && pos.x <= qrBox.x + qrBox.w && pos.y >= qrBox.y && pos.y <= qrBox.y + qrBox.h) {
+                    canvas.style.cursor = 'grab';
+                } else {
+                    canvas.style.cursor = 'default';
+                }
+            }
+        }
+
+        function handlePointerUp() {
+            isDragging = false;
+            isResizing = false;
+            canvas.style.cursor = 'default';
+        }
+
+        // Event Attachments
+        canvas.addEventListener('mousedown', handlePointerDown);
+        canvas.addEventListener('mousemove', handlePointerMove);
+        window.addEventListener('mouseup', handlePointerUp);
+
+        canvas.addEventListener('touchstart', handlePointerDown);
+        canvas.addEventListener('touchmove', handlePointerMove);
+        window.addEventListener('touchend', handlePointerUp);
+
+        // Download PNG tanpa overlay garis kontrol
+        function downloadPoster() {
+            renderCanvas();
+            setTimeout(() => {
+                // Temporarily re-render without interactive overlay for clean download
+                if (templateImage) ctx.drawImage(templateImage, 0, 0, canvas.width, canvas.height);
+                
+                const hiddenQrDiv = document.getElementById('qrcode-hidden');
+                const qrImg = hiddenQrDiv.querySelector('img');
+                
+                if (qrImg) {
+                    const qrImageObj = new Image();
+                    qrImageObj.onload = function() {
+                        ctx.drawImage(qrImageObj, qrBox.x, qrBox.y, qrBox.w, qrBox.h);
+                        if (customLogoImage) {
+                            const logoSize = qrBox.w * 0.22;
+                            const logoX = qrBox.x + (qrBox.w - logoSize) / 2;
+                            const logoY = qrBox.y + (qrBox.h - logoSize) / 2;
+                            ctx.fillStyle = '#ffffff';
+                            ctx.beginPath();
+                            ctx.arc(logoX + logoSize/2, logoY + logoSize/2, logoSize/1.8, 0, Math.PI * 2);
+                            ctx.fill();
+                            ctx.drawImage(customLogoImage, logoX, logoY, logoSize, logoSize);
+                        }
+
+                        const link = document.createElement('a');
+                        link.download = `QR-Poster-${Date.now()}.png`;
+                        link.href = canvas.toDataURL('image/png', 1.0);
+                        link.click();
+
+                        // Restore controls
+                        renderCanvas();
+                    };
+                    qrImageObj.src = qrImg.src;
+                }
+            }, 100);
+        }
+
         window.onload = function() {
             renderCanvas();
         };
 
-        // Re-render on live input changes
         document.getElementById('qrInput').addEventListener('input', renderCanvas);
     </script>
 </body>
